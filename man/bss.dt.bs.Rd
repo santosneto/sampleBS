@@ -4,12 +4,12 @@
 \alias{bss.dt.bs}
 \title{Bayesian sample size in a decision-theoretic approach for the Birbaum-Saunders/inverse-gamma model.}
 \usage{
-bss.dt.bs(lf, a1, b1, a2, b2, c, rho = NULL, gam = NULL,
+bss.dt.bs(loss = "L1", a1 = 1E-2, b1 = 1E-2, a2 = 1E-2, b2 = 1E-2, c, rho = NULL, gam = NULL,
                 nmax = 1E2, nlag = 1E1, nrep = 1E2, lrep = 1E2,
                 npost = 1E2, plot = FALSE, ...)
 }
 \arguments{
-\item{lf}{1 or 2, representing the loss function used.}
+\item{loss}{L1, L2, L3 and L4 representing the loss function used.}
 
 \item{a1}{Hyperparameter of the prior distribution for beta.}
 

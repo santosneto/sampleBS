@@ -4,14 +4,14 @@
 \alias{rbs}
 \title{Random generation for the Birnbaum-Saunders distribution.}
 \usage{
-rbs(n, alpha, beta)
+rbs(n=1.0, alpha = 0.5, beta = 1.0)
 }
 \arguments{
-\item{n}{Sample size.}
+\item{n}{sample size.}
 
-\item{alpha}{Shape parameter.}
+\item{alpha}{shape parameter.}
 
-\item{beta}{Scale parameter.}
+\item{beta}{scale parameter.}
 }
 \value{
 A sample of size n from the Birnbaum-Saunders distribution.
