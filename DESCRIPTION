@@ -1,4 +1,4 @@
-Package: sampleBS
+Package: samplesizeBS
 Type: Package
 Title: Bayesian sample size in a decision-theoretic approach for the Birbaum-Saunders
 Version: 0.1-1
