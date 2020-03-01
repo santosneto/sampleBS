@@ -7,15 +7,35 @@
 rbs(n=1.0, alpha = 0.5, beta = 1.0)
 }
 \arguments{
-\item{n}{sample size.}
+\item{n}{number of observations. If \code{length(n) > 1}, the length is taken to be the number required.}
 
-\item{alpha}{shape parameter.}
+\item{alpha}{vector of shape parameter values.}
 
-\item{beta}{scale parameter.}
+\item{beta}{vector of scale parameter value.}
 }
 \value{
 A sample of size n from the Birnbaum-Saunders distribution.
 }
 \description{
 The random generation for the Birnbaum-Saunders distribution.
+}
+\details{
+The density function of the Birnbaum-Saunders distribution used in the function \code{rbs()} is
+
+\deqn{f_{X}(x|\alpha, \beta) = \frac{1}{\sqrt{2\,\pi}}\,\exp\left[-\frac{1}{2\alpha^2} \left(\frac{x}{\beta}+ \frac{\beta}{x}-2\right)\right]\frac{(x+\beta)}{2\alpha \sqrt{\beta x^{3}}}}
+}
+\note{
+If X is Birnbaum-Saunders distributed then  
+
+\eqn{X = (\beta/4)(\alpha Z + \sqrt{(\alpha Z)^2 + 4})^2,} 
+
+where Z follows a standard normal distribution.
+}
+\examples{
+x <- rbs(n=10, alpha = 10, beta = 2.0) 
+x   
+     
+}
+\author{
+Eliardo Costa \email{eliardo@ccet.ufrn} and Manoel Santos-Neto \email{manoel.ferreira@ufcg.edu.br}
 }

@@ -4,13 +4,31 @@
 #'
 #'@usage rbs(n=1.0, alpha = 0.5, beta = 1.0)
 #'
-#' @param n sample size.
-#' @param alpha shape parameter.
-#' @param beta scale parameter.
+#'@param n number of observations. If \code{length(n) > 1}, the length is taken to be the number required.
+#'@param alpha vector of shape parameter values.
+#'@param beta vector of scale parameter value.
 #'
-#' @return A sample of size n from the Birnbaum-Saunders distribution.
+#'@details The density function of the Birnbaum-Saunders distribution used in the function \code{rbs()} is
+#'
+#'\deqn{f_{X}(x|\alpha, \beta) = \frac{1}{\sqrt{2\,\pi}}\,\exp\left[-\frac{1}{2\alpha^2} \left(\frac{x}{\beta}+ \frac{\beta}{x}-2\right)\right]\frac{(x+\beta)}{2\alpha \sqrt{\beta x^{3}}}}
+#'
+#'@return A sample of size n from the Birnbaum-Saunders distribution.
+#' 
+#'@note If X is Birnbaum-Saunders distributed then  
+#' 
+#' \eqn{X = (\beta/4)(\alpha Z + \sqrt{(\alpha Z)^2 + 4})^2,} 
+#' 
+#' where Z follows a standard normal distribution.
+#' 
+#'@author Eliardo Costa \email{eliardo@ccet.ufrn} and Manoel Santos-Neto \email{manoel.ferreira@ufcg.edu.br}
+#'
+#' 
+#'@examples 
+#' x <- rbs(n=10, alpha = 10, beta = 2.0) 
+#' x   
+#'      
 #' @export
-#'
+
 
 rbs <- function(n=1.0, alpha=0.5, beta=1.0) {
   if (n == 1) {
