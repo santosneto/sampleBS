@@ -133,9 +133,9 @@ rpost.bs <- function(N, x, a1, b1, a2, b2, r)
 #' @param b2 hyperparameter of the prior distribution for alpha^2. The default is 1E-3.
 #' @param c a positive real number representing the cost of colect one aliquot. The default is 0.005.
 #' @param rho a number in (0, 1). The probability of the credible interval is \eqn{1-rho}. Only
-#' for lost function 1.
+#' for lost function 1. The default is 0.95. 
 #' @param gam a positive real number connected with the credible interval when using lost
-#' function 2.
+#' function 2. The default is 0.5.
 #' @param nmax a positive integer representing the maximum number for compute the Bayes risk.
 #' Default is 100.
 #' @param nlag a positive integer representing the lag in the n's used to compute the Bayes risk. Default is 10.
@@ -150,18 +150,15 @@ rpost.bs <- function(N, x, a1, b1, a2, b2, r)
 #' @references 
 #'Costa, E.G., Paulino, C.D., and Singer, J. M. (2019). Sample size determination to evaluate ballast water standards: a decision-theoretic approach. Tech. rept. University of Sao Paulo. 
 #'
-#'
 #'@author Eliardo Costa \email{eliardo@ccet.ufrn} and Manoel Santos-Neto \email{manoel.ferreira@ufcg.edu.br}
 #'
 #'@examples  
 #'bss.dt.bs(loss="L1",plot=TRUE)
 #'
-#'  
 #' @export
 #' @importFrom LearnBayes rigamma 
-
-
-bss.dt.bs <- function(loss = 'L1', a1 = 3, b1 = 2, a2 = 3, b2 = 2, c = 0.010, rho = NULL, gam = NULL,
+#' @importFrom graphics abline
+bss.dt.bs <- function(loss = 'L1', a1 = 3, b1 = 2, a2 = 3, b2 = 2, c = 0.010, rho = 0.95, gam = 0.5,
                       nmax = 1E2, nlag = 1E1, nrep = 1E2, lrep = 1E2, npost = 1E2, plot = FALSE, ...) {
 
   cl <- match.call()
@@ -234,7 +231,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 3, b1 = 2, a2 = 3, b2 = 2, c = 0.010, rh
   }
   
   Y <- log(risk - c*ns)
-  fit <- stats::lm(Y ~ I(log(ns + 1)))
+  fit <- lm(Y ~ I(log(ns + 1)))
   E <- as.numeric(exp(fit$coef[1]))
   G <- as.numeric(-fit$coef[2])
   nmin <- ceiling((E*G/c)^(1/(G + 1))-1)
@@ -243,7 +240,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 3, b1 = 2, a2 = 3, b2 = 2, c = 0.010, rh
     plot(ns, risk, xlim = c(0, nmax), xlab = "n", ylab = "TC(n)")
     curve <- function(x) {c*x + E/(1 + x)^G}
     plot(function(x) curve(x), 0, nmax, col = "blue", add = TRUE)
-    graphics::abline(v = nmin, col = "red")
+    abline(v = nmin, col = "red")
   }
   # Output
   cat("\nCall:\n")
@@ -251,3 +248,5 @@ bss.dt.bs <- function(loss = 'L1', a1 = 3, b1 = 2, a2 = 3, b2 = 2, c = 0.010, rh
   cat("\nSample size:\n")
   cat("n  = ", nmin, "\n")
 }
+
+

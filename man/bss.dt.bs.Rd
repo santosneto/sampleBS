@@ -23,10 +23,10 @@ bss.dt.bs(loss = "L1", a1 = 1E-3, b1 = 1E-3, a2 = 1E-3,
 \item{c}{a positive real number representing the cost of colect one aliquot. The default is 0.005.}
 
 \item{rho}{a number in (0, 1). The probability of the credible interval is \eqn{1-rho}. Only
-for lost function 1.}
+for lost function 1. The default is 0.95.}
 
 \item{gam}{a positive real number connected with the credible interval when using lost
-function 2.}
+function 2. The default is 0.5.}
 
 \item{nmax}{a positive integer representing the maximum number for compute the Bayes risk.
 Default is 100.}
@@ -51,9 +51,8 @@ Function for Bayesian sample size determination via decision-theoretic approach 
 }
 \examples{
  
-#n_bs <- bss.dt.bs(plot=TRUE)
-#print(n_bs)
- 
+bss.dt.bs(loss="L1",plot=TRUE)
+
 }
 \references{
 Costa, E.G., Paulino, C.D., and Singer, J. M. (2019). Sample size determination to evaluate ballast water standards: a decision-theoretic approach. Tech. rept. University of Sao Paulo.
