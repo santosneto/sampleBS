@@ -4,7 +4,8 @@
 \alias{bss.dt.bs}
 \title{Bayesian sample size in a decision-theoretic approach for the Birbaum-Saunders/inverse-gamma model.}
 \usage{
-bss.dt.bs(loss = "L1", a1 = 1E-3, b1 = 1E-3, a2 = 1E-3, b2 = 1E-3, c=0.005, rho = NULL, gam = NULL,
+bss.dt.bs(loss = "L1", a1 = 1E-3, b1 = 1E-3, a2 = 1E-3, 
+                b2 = 1E-3, c=0.005, rho = NULL, gam = NULL,
                 nmax = 1E2, nlag = 1E1, nrep = 1E2, lrep = 1E2,
                 npost = 1E2, plot = FALSE, ...)
 }
@@ -50,8 +51,8 @@ Function for Bayesian sample size determination via decision-theoretic approach 
 }
 \examples{
  
-n_bs <- bss.dt.bs(plot=TRUE)
-print(n_bs)
+#n_bs <- bss.dt.bs(plot=TRUE)
+#print(n_bs)
  
 }
 \references{

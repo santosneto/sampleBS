@@ -74,20 +74,23 @@ rbs <- function(n=1.0, alpha=0.5, beta=1.0) {
 #'@author Eliardo Costa \email{eliardo@ccet.ufrn} and Manoel Santos-Neto \email{manoel.ferreira@ufcg.edu.br}
 #'
 #' @export
+#' 
+#' @importFrom stats median optimize quantile rnorm runif var
+ 
 
 rpost.bs <- function(N, x, a1, b1, a2, b2, r) 
   {
   
   n <- length(x)
   betaLog <- function(b) {
-   1/(r + 1) * (-(n + a1 + 1) * log(b) - b1/b + sum(log((b/x)^(1/2) + (b/x)^(3/2))) - ((n + 1)/2 + a2) * log(sum(1/2 * (x/b + b/x - 2)) + b2))
+   (1/(r + 1))*( -(n + a1 + 1)*log(b) - b1/b + sum(log( (b/x)^(1/2) + (b/x)^(3/2) )) - ((n + 1)/2 + a2)*log(sum(1/2 * (x/b + b/x - 2)) + b2))
   }
   betafLog <- function(b) {
-  log(b) + r/(r + 1) * (-(n + a1 + 1) * log(b) - b1/b + sum(log((b/x)^(1/2) + (b/x)^(3/2))) - ((n + 1)/2 + a2) * log(sum(1/2 * (x/b + b/x - 2)) + b2))
+  log(b) + (r/(r + 1)) * (-(n + a1 + 1)*log(b) - b1/b + sum(log((b/x)^(1/2) + (b/x)^(3/2))) - ((n + 1)/2 + a2) * log(sum(1/2 * (x/b + b/x - 2)) + b2))
   }
   
-  a.max <- optimize(betaLog, lower = 0, upper = 1E20, maximum = TRUE)$objective
-  b.max <- optimize(betafLog, lower = 0, upper = 1E20, maximum = TRUE)$objective
+  a.max <- optimize(betaLog, lower = 0, upper = 1E20, maximum = TRUE, tol = 0.0001)$objective
+  b.max <- optimize(betafLog, lower = 0, upper = 1E20, maximum = TRUE, tol = 0.0001)$objective
   
   a.val <- b.val <- rep(0, N)
   for (j in 1:N) {
@@ -100,7 +103,7 @@ rpost.bs <- function(N, x, a1, b1, a2, b2, r)
       rho <- V/U^r
     }
     b.val[j] <- rho
-    a.val[j] <- LearnBayes::rigamma(1, n/2 + a2, sum(x/rho + rho/x - 2)/2 + b2)
+    a.val[j] <- rigamma(1, n/2 + a2, sum(x/rho + rho/x - 2)/2 + b2)
   }
   #cred.a <- emp.hpd(sqrt(a.val), conf = cred.level)
   #cred.b <- emp.hpd(b.val, conf = cred.level)
@@ -115,7 +118,8 @@ rpost.bs <- function(N, x, a1, b1, a2, b2, r)
 #'
 #'@description Function for Bayesian sample size determination via decision-theoretic approach for the Birbaum-Saunders/inverse-gamma model.
 #'
-#'@usage bss.dt.bs(loss = "L1", a1 = 1E-3, b1 = 1E-3, a2 = 1E-3, b2 = 1E-3, c=0.005, rho = NULL, gam = NULL,
+#'@usage bss.dt.bs(loss = "L1", a1 = 1E-3, b1 = 1E-3, a2 = 1E-3, 
+#'                 b2 = 1E-3, c=0.005, rho = NULL, gam = NULL,
 #'                 nmax = 1E2, nlag = 1E1, nrep = 1E2, lrep = 1E2,
 #'                 npost = 1E2, plot = FALSE, ...)
 #'
@@ -147,10 +151,12 @@ rpost.bs <- function(N, x, a1, b1, a2, b2, r)
 #'@author Eliardo Costa \email{eliardo@ccet.ufrn} and Manoel Santos-Neto \email{manoel.ferreira@ufcg.edu.br}
 #'
 #'@examples  
-#'n_bs <- bss.dt.bs(plot=TRUE)
-#'print(n_bs)
+#'#n_bs <- bss.dt.bs(plot=TRUE)
+#'#print(n_bs)
 #'  
 #' @export
+#' @importFrom LearnBayes rigamma 
+
 
 bss.dt.bs <- function(loss = 'L1', a1 = 1E-3, b1 = 1E-3, a2 = 1E-3, b2 = 1E-3, c = 0.005, rho = NULL, gam = NULL,
                       nmax = 1E2, nlag = 1E1, nrep = 1E2, lrep = 1E2, npost = 1E2, plot = FALSE, ...) {
