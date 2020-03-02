@@ -7,26 +7,35 @@
 rpost.bs(N, x, a1, b1, a2, b2, r)
 }
 \arguments{
-\item{N}{Number of observations.}
+\item{N}{number of observations.}
 
-\item{x}{Observed values of the model.}
+\item{x}{vector of observed values of the model.}
 
-\item{a1}{Hyperparameter of the prior distribution for beta.}
+\item{a1}{hyperparameter of the prior distribution for beta.}
 
-\item{b1}{Hyperparameter of the prior distribution for beta.}
+\item{b1}{hyperparameter of the prior distribution for beta.}
 
-\item{a2}{Hyperparameter of the prior distribution for alpha^2.}
+\item{a2}{hyperparameter of the prior distribution for \code{alpha^2}.}
 
-\item{b2}{Hyperparameter of the prior distribution for alpha^2.}
+\item{b2}{hyperparameter of the prior distribution for alpha^2.}
 
-\item{r}{A constant for the sampling method.}
+\item{r}{a positive constant for the sampling method.}
 }
 \value{
 A random sample of the posterior distribution of the model Birnbaum-Saunders/inverse-gamma.
 }
 \description{
-The function
+The function for random generation of the posterior distribution of the Birnbaum-Saunders/inverse-gamma model.
 }
 \note{
-We adapted the available R script (Supplementary Material) of Wang, Sun & Park (2016, Comp. Stat.)
+We adapted the available R script (Supplementary Material) of Wang et. al. (2016). Wang et. al. (2016) shows that
+a good choice of \code{r} should be an integer that is greater than or equal 1 and that the Bayesian estimation of the BS distribution
+is insensitive to the choice of \code{r}. Wang et. al. (2016) also shows that the best combinations of the hyperparameters should be taken \eqn{a1=b1=a2=b2 \neq 10^{-3}} 
+in order to use diffuse proper priors and obtain more stable results.
+}
+\references{
+Wang, M., Sun, X. and Park, C. (2016) Bayesian analysis of Birnbaum-Saunders distribution via the generalized ratio-of-uniforms methods. Comput. Stat. 31: 207--225.
+}
+\author{
+Eliardo Costa \email{eliardo@ccet.ufrn} and Manoel Santos-Neto \email{manoel.ferreira@ufcg.edu.br}
 }

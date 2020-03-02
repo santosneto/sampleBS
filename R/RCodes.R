@@ -47,24 +47,33 @@ rbs <- function(n=1.0, alpha=0.5, beta=1.0) {
 
 #' Random generation for the posterior distribution of the Birnbaum-Saunders/inverse-gamma model.
 #'
-#'@description The function
+#'@description The function for random generation of the posterior distribution of the Birnbaum-Saunders/inverse-gamma model.
 #'
 #'
 #'@usage rpost.bs(N, x, a1, b1, a2, b2, r)
 #'
-#' @param N Number of observations.
-#' @param x Observed values of the model.
-#' @param a1 Hyperparameter of the prior distribution for beta.
-#' @param b1 Hyperparameter of the prior distribution for beta.
-#' @param a2 Hyperparameter of the prior distribution for alpha^2.
-#' @param b2 Hyperparameter of the prior distribution for alpha^2.
-#' @param r A constant for the sampling method.
+#' @param N number of observations.
+#' @param x vector of observed values of the model.
+#' @param a1 hyperparameter of the prior distribution for beta. 
+#' @param b1 hyperparameter of the prior distribution for beta.
+#' @param a2 hyperparameter of the prior distribution for \code{alpha^2}.
+#' @param b2 hyperparameter of the prior distribution for alpha^2.
+#' @param r a positive constant for the sampling method. 
 #'
-#' @note We adapted the available R script (Supplementary Material) of Wang, Sun & Park (2016, Comp. Stat.)
+#' @note We adapted the available R script (Supplementary Material) of Wang et. al. (2016). Wang et. al. (2016) shows that
+#' a good choice of \code{r} should be an integer that is greater than or equal 1 and that the Bayesian estimation of the BS distribution
+#' is insensitive to the choice of \code{r}. Wang et. al. (2016) also shows that the best combinations of the hyperparameters should be taken \eqn{a1=b1=a2=b2 \neq 10^{-3}} 
+#' in order to use diffuse proper priors and obtain more stable results.
 #'
-#' @return A random sample of the posterior distribution of the model Birnbaum-Saunders/inverse-gamma.
+#' @return A random sample of the posterior distribution of the model Birnbaum-Saunders/inverse-gamma. 
+#' 
+#' @references 
+#' 
+#' Wang, M., Sun, X. and Park, C. (2016) Bayesian analysis of Birnbaum-Saunders distribution via the generalized ratio-of-uniforms methods. Comput. Stat. 31: 207--225.
+#' 
+#'@author Eliardo Costa \email{eliardo@ccet.ufrn} and Manoel Santos-Neto \email{manoel.ferreira@ufcg.edu.br}
+#'
 #' @export
-#'
 
 rpost.bs <- function(N, x, a1, b1, a2, b2, r) 
   {
@@ -104,56 +113,60 @@ rpost.bs <- function(N, x, a1, b1, a2, b2, r)
 
 #' Bayesian sample size in a decision-theoretic approach for the Birbaum-Saunders/inverse-gamma model.
 #'
-#'@description A function
+#'@description Function for Bayesian sample size determination via decision-theoretic approach for the Birbaum-Saunders/inverse-gamma model.
 #'
-#'@usage bss.dt.bs(loss = "L1", a1 = 1E-2, b1 = 1E-2, a2 = 1E-2, b2 = 1E-2, c, rho = NULL, gam = NULL,
+#'@usage bss.dt.bs(loss = "L1", a1 = 1E-3, b1 = 1E-3, a2 = 1E-3, b2 = 1E-3, c=0.005, rho = NULL, gam = NULL,
 #'                 nmax = 1E2, nlag = 1E1, nrep = 1E2, lrep = 1E2,
 #'                 npost = 1E2, plot = FALSE, ...)
 #'
-#' @param loss L1, L2, L3 and L4 representing the loss function used.
-#' @param a1 Hyperparameter of the prior distribution for beta.
-#' @param b1 Hyperparameter of the prior distribution for beta.
-#' @param a2 Hyperparameter of the prior distribution for alpha^2.
-#' @param b2 Hyperparameter of the prior distribution for alpha^2.
-#' @param c A positive real number representing the cost of colect one aliquot.
-#' @param rho A number in (0, 1). The probability of the credible interval is $1-rho$. Only
+#' @param loss L1 (Absolute loss), L2 (Quadratic loss), L3 (Weighted loss) and L4 (Half loss) representing the loss function used. The default is absolute loss function.
+#' @param a1 hyperparameter of the prior distribution for beta. The default is 1E-3.
+#' @param b1 hyperparameter of the prior distribution for beta. The default is 1E-3.
+#' @param a2 hyperparameter of the prior distribution for alpha^2. The default is 1E-3.
+#' @param b2 hyperparameter of the prior distribution for alpha^2. The default is 1E-3.
+#' @param c a positive real number representing the cost of colect one aliquot. The default is 0.005.
+#' @param rho a number in (0, 1). The probability of the credible interval is \eqn{1-rho}. Only
 #' for lost function 1.
-#' @param gam A positive real number connected with the credible interval when using lost
+#' @param gam a positive real number connected with the credible interval when using lost
 #' function 2.
-#' @param nmax A positive integer representing the maximum number for compute the Bayes risk.
+#' @param nmax a positive integer representing the maximum number for compute the Bayes risk.
 #' Default is 100.
-#' @param nlag A positive integer representing the lag in the n's used to compute the Bayes risk. Default is 10.
-#' @param nrep A positive integer representing the number of samples taken for each $n$.
-#' @param lrep A positive integer representing the number of samples taken for $S_n$. Default is 100.
-#' @param npost A positive integer representing the number of values to draw from the posterior distribution of the mean. Default is 100.
+#' @param nlag a positive integer representing the lag in the n's used to compute the Bayes risk. Default is 10.
+#' @param nrep a positive integer representing the number of samples taken for each \eqn{n}.
+#' @param lrep a positive integer representing the number of samples taken for \eqn{S_n}. Default is 100.
+#' @param npost a positive integer representing the number of values to draw from the posterior distribution of the mean. Default is 100.
 #' @param plot Boolean. If TRUE (default) it plot the estimated Bayes risks and the fitted curve.
 #' @param ... Currently ignored.
 #'
 #' @return An integer representing the sample size.
+#' 
+#' @references 
+#'Costa, E.G., Paulino, C.D., and Singer, J. M. (2019). Sample size determination to evaluate ballast water standards: a decision-theoretic approach. Tech. rept. University of Sao Paulo. 
+#'
+#'
+#'@author Eliardo Costa \email{eliardo@ccet.ufrn} and Manoel Santos-Neto \email{manoel.ferreira@ufcg.edu.br}
+#'
+#'@examples  
+#'n_bs <- bss.dt.bs(plot=TRUE)
+#'print(n_bs)
+#'  
 #' @export
-#' 
-#' 
-
 
 bss.dt.bs <- function(loss = 'L1', a1 = 1E-3, b1 = 1E-3, a2 = 1E-3, b2 = 1E-3, c = 0.005, rho = NULL, gam = NULL,
                       nmax = 1E2, nlag = 1E1, nrep = 1E2, lrep = 1E2, npost = 1E2, plot = FALSE, ...) {
-  
-  eps <- 1E-3
-  r0 <- max(1/(a1+a2+(1/2)) + eps,1.0)
-  
+
   cl <- match.call()
   ns <- rep(seq(3, nmax, by = nlag), each = nrep)
   if (loss == 'L2') { # quadratic loss
     risk <- sapply(ns, function(n) {
       loss <- sapply(seq_len(lrep), function(j) {
-        alpha2 <- LearnBayes::rigamma(n = n, a = a2, b = b2)
+        alpha2 <- rigamma(n = n, a = a2, b = b2)
         alpha <- sqrt(alpha2)
-        beta <- LearnBayes::rigamma(n = n, a = a1, b = b1)
+        beta <- rigamma(n = n, a = a1, b = b1)
         x <- rbs(n = 1, alpha = alpha, beta = beta)
-        post.xn <- rpost.bs(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2,
-                            b2 = b2, r = r0) # mudar r depois
+        post.xn <- rpost.bs(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2, r = max(1/(a1+a2+(1/2)) + 1E-3,1.0))
         mu.post <- post.xn[, 2]*(1 + post.xn[, 1]^2/2)
-        out.loss <- stats::var(mu.post) + c*n
+        out.loss <- var(mu.post) + c*n
         return(out.loss)
       })
       out.risk <- mean(loss)
@@ -163,11 +176,11 @@ bss.dt.bs <- function(loss = 'L1', a1 = 1E-3, b1 = 1E-3, a2 = 1E-3, b2 = 1E-3, c
   if (loss == 'L1') { # absolute loss
     risk <- sapply(ns, function(n) {
       loss <- sapply(seq_len(lrep), function(j) {
-        alpha2 <- LearnBayes::rigamma(n = n, a = a2, b = b2)
+        alpha2 <- rigamma(n = n, a = a2, b = b2)
         alpha <- sqrt(alpha2)
-        beta <- LearnBayes::rigamma(n = n, a = a1, b = b1)
+        beta <- rigamma(n = n, a = a1, b = b1)
         x <- rbs(n = 1, alpha = alpha, beta = beta)
-        post.xn <- rpost.bs(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2, r = r0) # mudar r depois
+        post.xn <- rpost.bs(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2, r = max(1/(a1+a2+(1/2)) + 1E-3,1.0)) 
         mu.post <- post.xn[, 2]*(1 + post.xn[, 1]^2/2)
         med.post <- median(mu.post)
         out.loss <- mean(abs(mu.post - med.post)) + c*n
@@ -180,13 +193,13 @@ bss.dt.bs <- function(loss = 'L1', a1 = 1E-3, b1 = 1E-3, a2 = 1E-3, b2 = 1E-3, c
   if (loss == 'L3') { # loss function for interval inference depending on rho
     risk <- sapply(ns, function(n) {
       loss <- sapply(seq_len(lrep), function(j) {
-        alpha2 <- LearnBayes::rigamma(n = n, a = a2, b = b2)
+        alpha2 <- rigamma(n = n, a = a2, b = b2)
         alpha <- sqrt(alpha2)
-        beta <- LearnBayes::rigamma(n = n, a = a1, b = b1)
+        beta <- rigamma(n = n, a = a1, b = b1)
         x <- rbs(n = 1, alpha = alpha, beta = beta)
-        post.xn <- rpost.bs(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2,b2 = b2, r = r0) # mudar r depois
+        post.xn <- rpost.bs(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2,b2 = b2, r = max(1/(a1+a2+(1/2)) + 1E-3,1.0)) 
         mu.post <- post.xn[, 2]*(1 + post.xn[, 1]^2/2)
-        qs <- stats::quantile(mu.post, probs = c(rho/2, 1 - rho/2))
+        qs <- quantile(mu.post, probs = c(rho/2, 1 - rho/2))
         out.loss <- sum(mu.post[which(mu.post > qs[2])])/npost - sum(mu.post[which(mu.post < qs[1])])/npost + c*n
         return(out.loss)
       })
@@ -197,11 +210,11 @@ bss.dt.bs <- function(loss = 'L1', a1 = 1E-3, b1 = 1E-3, a2 = 1E-3, b2 = 1E-3, c
   if (loss == 'L4') { # loss function for interval inference depending on gamma
     risk <- sapply(ns, function(n) {
       loss <- sapply(seq_len(lrep), function(j) {
-        alpha2 <- LearnBayes::rigamma(n = n, a = a2, b = b2)
+        alpha2 <- rigamma(n = n, a = a2, b = b2)
         alpha <- sqrt(alpha2)
-        beta <- LearnBayes::rigamma(n = n, a = a1, b = b1)
+        beta <- rigamma(n = n, a = a1, b = b1)
         x <- rbs(n = 1, alpha = alpha, beta = beta)
-        post.xn <- rpost.bs(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2,b2 = b2, r = r0) # mudar r depois
+        post.xn <- rpost.bs(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2,b2 = b2, r = max(1/(a1+a2+(1/2)) + 1E-3,1.0))
         mu.post <- post.xn[, 2]*(1 + post.xn[, 1]^2/2)
         out.loss <- 2*sqrt(gam*stats::var(mu.post)) + c*n
         return(out.loss)

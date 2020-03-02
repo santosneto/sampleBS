@@ -4,39 +4,39 @@
 \alias{bss.dt.bs}
 \title{Bayesian sample size in a decision-theoretic approach for the Birbaum-Saunders/inverse-gamma model.}
 \usage{
-bss.dt.bs(loss = "L1", a1 = 1E-2, b1 = 1E-2, a2 = 1E-2, b2 = 1E-2, c, rho = NULL, gam = NULL,
+bss.dt.bs(loss = "L1", a1 = 1E-3, b1 = 1E-3, a2 = 1E-3, b2 = 1E-3, c=0.005, rho = NULL, gam = NULL,
                 nmax = 1E2, nlag = 1E1, nrep = 1E2, lrep = 1E2,
                 npost = 1E2, plot = FALSE, ...)
 }
 \arguments{
-\item{loss}{L1, L2, L3 and L4 representing the loss function used.}
+\item{loss}{L1 (Absolute loss), L2 (Quadratic loss), L3 (Weighted loss) and L4 (Half loss) representing the loss function used. The default is absolute loss function.}
 
-\item{a1}{Hyperparameter of the prior distribution for beta.}
+\item{a1}{hyperparameter of the prior distribution for beta. The default is 1E-3.}
 
-\item{b1}{Hyperparameter of the prior distribution for beta.}
+\item{b1}{hyperparameter of the prior distribution for beta. The default is 1E-3.}
 
-\item{a2}{Hyperparameter of the prior distribution for alpha^2.}
+\item{a2}{hyperparameter of the prior distribution for alpha^2. The default is 1E-3.}
 
-\item{b2}{Hyperparameter of the prior distribution for alpha^2.}
+\item{b2}{hyperparameter of the prior distribution for alpha^2. The default is 1E-3.}
 
-\item{c}{A positive real number representing the cost of colect one aliquot.}
+\item{c}{a positive real number representing the cost of colect one aliquot. The default is 0.005.}
 
-\item{rho}{A number in (0, 1). The probability of the credible interval is $1-rho$. Only
+\item{rho}{a number in (0, 1). The probability of the credible interval is \eqn{1-rho}. Only
 for lost function 1.}
 
-\item{gam}{A positive real number connected with the credible interval when using lost
+\item{gam}{a positive real number connected with the credible interval when using lost
 function 2.}
 
-\item{nmax}{A positive integer representing the maximum number for compute the Bayes risk.
+\item{nmax}{a positive integer representing the maximum number for compute the Bayes risk.
 Default is 100.}
 
-\item{nlag}{A positive integer representing the lag in the n's used to compute the Bayes risk. Default is 10.}
+\item{nlag}{a positive integer representing the lag in the n's used to compute the Bayes risk. Default is 10.}
 
-\item{nrep}{A positive integer representing the number of samples taken for each $n$.}
+\item{nrep}{a positive integer representing the number of samples taken for each \eqn{n}.}
 
-\item{lrep}{A positive integer representing the number of samples taken for $S_n$. Default is 100.}
+\item{lrep}{a positive integer representing the number of samples taken for \eqn{S_n}. Default is 100.}
 
-\item{npost}{A positive integer representing the number of values to draw from the posterior distribution of the mean. Default is 100.}
+\item{npost}{a positive integer representing the number of values to draw from the posterior distribution of the mean. Default is 100.}
 
 \item{plot}{Boolean. If TRUE (default) it plot the estimated Bayes risks and the fitted curve.}
 
@@ -46,5 +46,17 @@ Default is 100.}
 An integer representing the sample size.
 }
 \description{
-A function
+Function for Bayesian sample size determination via decision-theoretic approach for the Birbaum-Saunders/inverse-gamma model.
+}
+\examples{
+ 
+n_bs <- bss.dt.bs(plot=TRUE)
+print(n_bs)
+ 
+}
+\references{
+Costa, E.G., Paulino, C.D., and Singer, J. M. (2019). Sample size determination to evaluate ballast water standards: a decision-theoretic approach. Tech. rept. University of Sao Paulo.
+}
+\author{
+Eliardo Costa \email{eliardo@ccet.ufrn} and Manoel Santos-Neto \email{manoel.ferreira@ufcg.edu.br}
 }
