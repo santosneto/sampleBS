@@ -82,25 +82,33 @@ rpost.bs <- function(N, x, a1, b1, a2, b2, r)
   {
   
   n <- length(x)
+  a1 <- a1
+  b1 <- b1
+  a2 <- a2
+  b2 <- b2
+  
   betaLog <- function(b) {
-   (1/(r + 1))*( -(n + a1 + 1)*log(b) - b1/b + sum(log( (b/x)^(1/2) + (b/x)^(3/2) )) - ((n + 1)/2 + a2)*log(sum(1/2 * (x/b + b/x - 2)) + b2))
+   (1/(r + 1))*( -(n + a1 + 1)*log(b) - b1/b + (n/2)*log(b) + sum(x+b) - (3/2)*sum(log(x)) - ((n + 1)/2 + a2)*((n/2)*(mean(x)/b + mean(1/x)*b -2) + b2   ) )   
   }
   betafLog <- function(b) {
-  log(b) + (r/(r + 1)) * (-(n + a1 + 1)*log(b) - b1/b + sum(log((b/x)^(1/2) + (b/x)^(3/2))) - ((n + 1)/2 + a2) * log(sum(1/2 * (x/b + b/x - 2)) + b2))
+  log(b) + (r/(r + 1)) * (-(n + a1 + 1)*log(b) - b1/b + (n/2)*log(b) + sum(x+b) - (3/2)*sum(log(x)) - ((n + 1)/2 + a2)*((n/2)*(mean(x)/b + mean(1/x)*b -2) + b2   ) )
   }
   
-  a.max <- optimize(betaLog, lower = 0, upper = 1E20, maximum = TRUE, tol = 0.0001)$objective
-  b.max <- optimize(betafLog, lower = 0, upper = 1E20, maximum = TRUE, tol = 0.0001)$objective
+  a.max <- optimize(betaLog, lower = 0, upper = 1E2, maximum = TRUE, tol = 0.001)$objective
+  b.max <- optimize(betafLog, lower = 0, upper = 1E2, maximum = TRUE, tol = 0.001)$objective
+  
+  print(a.max)
+  print(b.max)
   
   a.val <- b.val <- rep(0, N)
   for (j in 1:N) {
     U <- runif(1, 0, exp(a.max))
     V <- runif(1, 0, exp(b.max))
-    rho <- V/U^r
+    rho <- V/(U^r)
     while (log(U) > betaLog(rho)) {
       U <- runif(1, 0, exp(a.max))
       V <- runif(1, 0, exp(b.max))
-      rho <- V/U^r
+      rho <- V/(U^r)
     }
     b.val[j] <- rho
     a.val[j] <- rigamma(1, n/2 + a2, sum(x/rho + rho/x - 2)/2 + b2)
@@ -185,6 +193,8 @@ bss.dt.bs <- function(loss = 'L1', a1 = 1E-3, b1 = 1E-3, a2 = 1E-3, b2 = 1E-3, c
         alpha2 <- rigamma(n = n, a = a2, b = b2)
         alpha <- sqrt(alpha2)
         beta <- rigamma(n = n, a = a1, b = b1)
+        print(alpha)
+        print(beta)
         x <- rbs(n = 1, alpha = alpha, beta = beta)
         post.xn <- rpost.bs(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2, r = max(1/(a1+a2+(1/2)) + 1E-3,1.0)) 
         mu.post <- post.xn[, 2]*(1 + post.xn[, 1]^2/2)
