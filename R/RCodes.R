@@ -154,8 +154,8 @@ rpost.bs <- function(N, x, a1, b1, a2, b2, r)
 #'@author Eliardo Costa \email{eliardo@ccet.ufrn} and Manoel Santos-Neto \email{manoel.ferreira@ufcg.edu.br}
 #'
 #'@examples  
-#'#n_bs <- bss.dt.bs(plot=TRUE)
-#'#print(n_bs)
+#'bss.dt.bs(loss="L1",plot=TRUE)
+#'
 #'  
 #' @export
 #' @importFrom LearnBayes rigamma 
