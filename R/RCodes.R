@@ -94,8 +94,8 @@ rpost.bs <- function(N, x, a1, b1, a2, b2, r)
   log(b) + (r/(r + 1)) * (-(n + a1 + 1)*log(b) - b1/b + (n/2)*log(b) + sum(x+b) - (3/2)*sum(log(x)) - ((n + 1)/2 + a2)*((n/2)*(mean(x)/b + mean(1/x)*b -2) + b2   ) )
   }
   
-  a.max <- optimize(betaLog, lower = 0, upper = 1E2, maximum = TRUE, tol = 0.001)$objective
-  b.max <- optimize(betafLog, lower = 0, upper = 1E2, maximum = TRUE, tol = 0.001)$objective
+  a.max <- optimize(betaLog, lower = 0, upper = 1E2, maximum = TRUE)$objective
+  b.max <- optimize(betafLog, lower = 0, upper = 1E2, maximum = TRUE)$objective
   
   print(a.max)
   print(b.max)
