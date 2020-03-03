@@ -6,8 +6,8 @@
 \usage{
 bss.dt.bs(loss = "L1", a1 = 3, b1 = 2, a2 = 3, 
                 b2 = 2, c=0.010, rho = 0.95, gam = 0.5,
-                nmax = 1E1, nlag = 1E1, nrep = 1E1, lrep = 1E1,
-                npost = 1E1, plot = FALSE, ...)
+                nmax = 1E2, nlag = 1E1, nrep = 1E2, lrep = 1E2,
+                npost = 1E2, plot = FALSE, ...)
 }
 \arguments{
 \item{loss}{L1 (Absolute loss), L2 (Quadratic loss), L3 (Weighted loss) and L4 (Half loss) representing the loss function used. The default is absolute loss function.}
