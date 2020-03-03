@@ -6,7 +6,7 @@ Date: 2020-02-17
 Author: Manoel Santos Neto [aut, cre] and Eliador Costa[aut, cre]
 Maintainer: Manoel Santos Neto <mn.neco@gmail.com> and Eliardo Costa <eliardocosta@ccet.ufrn>
 Description: This package includes the estimation of the posterior distribution and obtention of the Bayesian optimum sample size.
-Depends: R (>= 3.1.2), LearnBayes, stats
+Depends: R (>= 3.1.2), LearnBayes, stats, ggplot2
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true

@@ -121,10 +121,10 @@ rpost.bs <- function(N, x, a1, b1, a2, b2, r)
 #'
 #'@description Function for Bayesian sample size determination via decision-theoretic approach for the Birbaum-Saunders/inverse-gamma model.
 #'
-#'@usage bss.dt.bs(loss = "L1", a1 = 1E-3, b1 = 1E-3, a2 = 1E-3, 
-#'                 b2 = 1E-3, c=0.005, rho = NULL, gam = NULL,
-#'                 nmax = 1E2, nlag = 1E1, nrep = 1E2, lrep = 1E2,
-#'                 npost = 1E2, plot = FALSE, ...)
+#'@usage bss.dt.bs(loss = "L1", a1 = 3, b1 = 2, a2 = 3, 
+#'                 b2 = 2, c=0.010, rho = 0.95, gam = 0.5,
+#'                 nmax = 1E1, nlag = 1E1, nrep = 1E1, lrep = 1E1,
+#'                 npost = 1E1, plot = FALSE, ...)
 #'
 #' @param loss L1 (Absolute loss), L2 (Quadratic loss), L3 (Weighted loss) and L4 (Half loss) representing the loss function used. The default is absolute loss function.
 #' @param a1 hyperparameter of the prior distribution for beta. The default is 1E-3.
@@ -157,9 +157,10 @@ rpost.bs <- function(N, x, a1, b1, a2, b2, r)
 #'
 #' @export
 #' @importFrom LearnBayes rigamma 
-#' @importFrom graphics abline
+#' @import ggplot2
+#' @importFrom stats lm
 bss.dt.bs <- function(loss = 'L1', a1 = 3, b1 = 2, a2 = 3, b2 = 2, c = 0.010, rho = 0.95, gam = 0.5,
-                      nmax = 1E2, nlag = 1E1, nrep = 1E2, lrep = 1E2, npost = 1E2, plot = FALSE, ...) {
+                      nmax = 1E1, nlag = 1E1, nrep = 1E1, lrep = 1E1, npost = 1E1, plot = FALSE, ...) {
 
   cl <- match.call()
   ns <- rep(seq(3, nmax, by = nlag), each = nrep)
@@ -236,17 +237,29 @@ bss.dt.bs <- function(loss = 'L1', a1 = 3, b1 = 2, a2 = 3, b2 = 2, c = 0.010, rh
   G <- as.numeric(-fit$coef[2])
   nmin <- ceiling((E*G/c)^(1/(G + 1))-1)
   
+
   if (plot == TRUE) {
-    plot(ns, risk, xlim = c(0, nmax), xlab = "n", ylab = "TC(n)")
+    
+    vx <- seq(0,nmax,l=100)
     curve <- function(x) {c*x + E/(1 + x)^G}
-    plot(function(x) curve(x), 0, nmax, col = "blue", add = TRUE)
-    abline(v = nmin, col = "red")
+    vc <- mapply(curve, x=vx)
+    data0 <- data.frame(ns=ns,risk=risk)
+    print(data0)
+    data1 <- data.frame(obs=x.,ab=vc)
+    print(data1)
+    ggplot(data0,aes(ns,risk)) + geom_point() + geom_line(color='blue',data=data1,aes(obs,ab)) + geom_vline(xintercept = nmin,colour='red') + xlim(0,nmax) + xlab("n") + ylab("TC(n)")
+    
+    #plot(ns, risk, xlim = c(0, nmax), xlab = "n", ylab = "TC(n)")
+    #plot(function(x) curve(x), 0, nmax, col = "blue", add = TRUE)
+    #abline(v = nmin, col = "red")
+    
   }
   # Output
   cat("\nCall:\n")
   print(cl)
   cat("\nSample size:\n")
   cat("n  = ", nmin, "\n")
+  
 }
 
 
