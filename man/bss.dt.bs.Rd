@@ -7,20 +7,20 @@
 bss.dt.bs(loss = "L1", a1 = 3, b1 = 2, a2 = 3, 
                 b2 = 2, c=0.010, rho = 0.95, gam = 0.5,
                 nmax = 1E2, nlag = 1E1, nrep = 1E2, lrep = 1E2,
-                npost = 1E2, plot = FALSE, ...)
+                npost = 1E2, plot = FALSE, print = TRUE, ...)
 }
 \arguments{
 \item{loss}{L1 (Absolute loss), L2 (Quadratic loss), L3 (Weighted loss) and L4 (Half loss) representing the loss function used. The default is absolute loss function.}
 
-\item{a1}{hyperparameter of the prior distribution for beta. The default is 1E-3.}
+\item{a1}{hyperparameter of the prior distribution for beta. The default is 3.}
 
-\item{b1}{hyperparameter of the prior distribution for beta. The default is 1E-3.}
+\item{b1}{hyperparameter of the prior distribution for beta. The default is 2.}
 
-\item{a2}{hyperparameter of the prior distribution for alpha^2. The default is 1E-3.}
+\item{a2}{hyperparameter of the prior distribution for alpha^2. The default is 3.}
 
-\item{b2}{hyperparameter of the prior distribution for alpha^2. The default is 1E-3.}
+\item{b2}{hyperparameter of the prior distribution for alpha^2. The default is 2.}
 
-\item{c}{a positive real number representing the cost of colect one aliquot. The default is 0.005.}
+\item{c}{a positive real number representing the cost of colect one aliquot. The default is 0.010.}
 
 \item{rho}{a number in (0, 1). The probability of the credible interval is \eqn{1-rho}. Only
 for lost function 1. The default is 0.95.}
