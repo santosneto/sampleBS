@@ -259,7 +259,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 3, b1 = 2, a2 = 3, b2 = 2, c = 0.010, rh
   cat("\nSample size:\n")
   cat("n  = ", nmin, "\n")
   }else{ 
-   out <- list(n = nmin, risk=risk, c=c, loss = loss, E=E, G=G, x=x)
+   out <- list(n = nmin, risk=risk, c=c, loss = loss, E=E, G=G)
   
   return(out)
   }
