@@ -122,9 +122,9 @@ rpost.bs <- function(N, x, a1, b1, a2, b2, r)
 #'@description Function for Bayesian sample size determination via decision-theoretic approach for the Birbaum-Saunders/inverse-gamma model.
 #'
 #'@usage bss.dt.bs(loss = "L1", a1 = 3, b1 = 2, a2 = 3, 
-#'                 b2 = 2, c=0.010, rho = 0.95, gam = 0.5,
+#'                 b2 = 2, cost=0.010, rho = 0.95, gam = 0.5,
 #'                 nmax = 1E2, nlag = 1E1, nrep = 1E2, lrep = 1E2,
-#'                 npost = 1E2, plot = FALSE, print = TRUE, ...)
+#'                 npost = 1E2, plots = FALSE, prints = TRUE, ...)
 #'
 #' @param loss L1 (Absolute loss), L2 (Quadratic loss), L3 (Weighted loss) and L4 (Half loss) representing the loss function used. The default is absolute loss function.
 #' @param a1 hyperparameter of the prior distribution for beta. The default is 3.
@@ -159,8 +159,8 @@ rpost.bs <- function(N, x, a1, b1, a2, b2, r)
 #' @importFrom LearnBayes rigamma 
 #' @import ggplot2
 #' @importFrom stats lm
-bss.dt.bs <- function(loss = 'L1', a1 = 3, b1 = 2, a2 = 3, b2 = 2, c = 0.010, rho = 0.95, gam = 0.5,
-                      nmax = 1E2, nlag = 1E1, nrep = 1E2, lrep = 1E2, npost = 1E2, plot = FALSE, print  = TRUE, ...) {
+bss.dt.bs <- function(loss = 'L1', a1 = 3, b1 = 2, a2 = 3, b2 = 2, cost = 0.010, rho = 0.95, gam = 0.5,
+                      nmax = 1E2, nlag = 1E1, nrep = 1E2, lrep = 1E2, npost = 1E2, plots = FALSE, prints  = TRUE, ...) {
 
   cl <- match.call()
   ns <- rep(seq(3, nmax, by = nlag), each = nrep)
@@ -173,7 +173,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 3, b1 = 2, a2 = 3, b2 = 2, c = 0.010, rh
         x <- rbs(n = 1, alpha = alpha, beta = beta)
         post.xn <- rpost.bs(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2, r = max(1/(a1+a2+(1/2)) + 1E-3,1.0))
         mu.post <- post.xn[, 2]*(1 + post.xn[, 1]^2/2)
-        out.loss <- var(mu.post) + c*n
+        out.loss <- var(mu.post) + cost*n
         return(out.loss)
       })
       out.risk <- mean(loss)
@@ -190,7 +190,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 3, b1 = 2, a2 = 3, b2 = 2, c = 0.010, rh
         post.xn <- rpost.bs(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2, r = max(1/(a1+a2+(1/2)) + 1E-3,1.0)) 
         mu.post <- post.xn[, 2]*(1 + post.xn[, 1]^2/2)
         med.post <- median(mu.post)
-        out.loss <- mean(abs(mu.post - med.post)) + c*n
+        out.loss <- mean(abs(mu.post - med.post)) + cost*n
         return(out.loss)
       })
       out.risk <- mean(loss)
@@ -207,7 +207,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 3, b1 = 2, a2 = 3, b2 = 2, c = 0.010, rh
         post.xn <- rpost.bs(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2,b2 = b2, r = max(1/(a1+a2+(1/2)) + 1E-3,1.0)) 
         mu.post <- post.xn[, 2]*(1 + post.xn[, 1]^2/2)
         qs <- quantile(mu.post, probs = c(rho/2, 1 - rho/2))
-        out.loss <- sum(mu.post[which(mu.post > qs[2])])/npost - sum(mu.post[which(mu.post < qs[1])])/npost + c*n
+        out.loss <- sum(mu.post[which(mu.post > qs[2])])/npost - sum(mu.post[which(mu.post < qs[1])])/npost + cost*n
         return(out.loss)
       })
       out.risk <- mean(loss)
@@ -223,7 +223,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 3, b1 = 2, a2 = 3, b2 = 2, c = 0.010, rh
         x <- rbs(n = 1, alpha = alpha, beta = beta)
         post.xn <- rpost.bs(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2,b2 = b2, r = max(1/(a1+a2+(1/2)) + 1E-3,1.0))
         mu.post <- post.xn[, 2]*(1 + post.xn[, 1]^2/2)
-        out.loss <- 2*sqrt(gam*stats::var(mu.post)) + c*n
+        out.loss <- 2*sqrt(gam*stats::var(mu.post)) + cost*n
         return(out.loss)
       })
       out.risk <- mean(loss)
@@ -231,17 +231,17 @@ bss.dt.bs <- function(loss = 'L1', a1 = 3, b1 = 2, a2 = 3, b2 = 2, c = 0.010, rh
     })
   }
   
-  Y <- log(risk - c*ns)
+  Y <- log(risk - cost*ns)
   fit <- lm(Y ~ I(log(ns + 1)))
   E <- as.numeric(exp(fit$coef[1]))
   G <- as.numeric(-fit$coef[2])
-  nmin <- ceiling((E*G/c)^(1/(G + 1))-1)
+  nmin <- ceiling((E*G/cost)^(1/(G + 1))-1)
   
 
   if (plot == TRUE) {
     
     vx <- seq(0,nmax,l=100)
-    curve <- function(x) {c*x + E/((1 + x)^G)}
+    curve <- function(x) {cost*x + E/((1 + x)^G)}
     vc <- mapply(curve, x=vx)
     data0 <- data.frame(ns=ns,risk=risk)
     data1 <- data.frame(obs=vx,ab=vc)
@@ -251,7 +251,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 3, b1 = 2, a2 = 3, b2 = 2, c = 0.010, rh
     
   }
   
-  if(print == TRUE)
+  if(prints == TRUE)
   {  
   # Output
   cat("\nCall:\n")
@@ -259,7 +259,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 3, b1 = 2, a2 = 3, b2 = 2, c = 0.010, rh
   cat("\nSample size:\n")
   cat("n  = ", nmin, "\n")
   }else{ 
-   out <- list(n = nmin, risk=risk, c=c, loss = loss, E=E, G=G)
+   out <- list(n = nmin, risk=risk, cost=cost, loss = loss, E=E, G=G)
   
   return(out)
   }

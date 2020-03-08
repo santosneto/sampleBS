@@ -5,9 +5,9 @@
 \title{Bayesian sample size in a decision-theoretic approach for the Birbaum-Saunders/inverse-gamma model.}
 \usage{
 bss.dt.bs(loss = "L1", a1 = 3, b1 = 2, a2 = 3, 
-                b2 = 2, c=0.010, rho = 0.95, gam = 0.5,
+                b2 = 2, cost=0.010, rho = 0.95, gam = 0.5,
                 nmax = 1E2, nlag = 1E1, nrep = 1E2, lrep = 1E2,
-                npost = 1E2, plot = FALSE, print = TRUE, ...)
+                npost = 1E2, plots = FALSE, prints = TRUE, ...)
 }
 \arguments{
 \item{loss}{L1 (Absolute loss), L2 (Quadratic loss), L3 (Weighted loss) and L4 (Half loss) representing the loss function used. The default is absolute loss function.}
@@ -19,8 +19,6 @@ bss.dt.bs(loss = "L1", a1 = 3, b1 = 2, a2 = 3,
 \item{a2}{hyperparameter of the prior distribution for alpha^2. The default is 3.}
 
 \item{b2}{hyperparameter of the prior distribution for alpha^2. The default is 2.}
-
-\item{c}{a positive real number representing the cost of colect one aliquot. The default is 0.010.}
 
 \item{rho}{a number in (0, 1). The probability of the credible interval is \eqn{1-rho}. Only
 for lost function 1. The default is 0.95.}
@@ -39,9 +37,11 @@ Default is 100.}
 
 \item{npost}{a positive integer representing the number of values to draw from the posterior distribution of the mean. Default is 100.}
 
-\item{plot}{Boolean. If TRUE (default) it plot the estimated Bayes risks and the fitted curve.}
-
 \item{...}{Currently ignored.}
+
+\item{c}{a positive real number representing the cost of colect one aliquot. The default is 0.010.}
+
+\item{plot}{Boolean. If TRUE (default) it plot the estimated Bayes risks and the fitted curve.}
 }
 \value{
 An integer representing the sample size.
