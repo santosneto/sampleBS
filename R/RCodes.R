@@ -121,8 +121,8 @@ rpost.bs <- function(N, x, a1, b1, a2, b2, r)
 #'
 #'@description Function for Bayesian sample size determination via decision-theoretic approach for the Birbaum-Saunders/inverse-gamma model.
 #'
-#'@usage bss.dt.bs(loss = "L1", a1 = 3, b1 = 2, a2 = 3, 
-#'                 b2 = 2, cost=0.010, rho = 0.95, gam = 0.5,
+#'@usage bss.dt.bs(loss = "L1", a1 = 2.5, b1 = 100, a2 = 2.5, 
+#'                 b2 = 100, cost=0.01, rho = 0.05, gam = 0.25,
 #'                 nmax = 1E2, nlag = 1E1, nrep = 1E2, lrep = 1E2,
 #'                 npost = 1E2, plots = FALSE, prints = TRUE, ...)
 #'
@@ -131,7 +131,7 @@ rpost.bs <- function(N, x, a1, b1, a2, b2, r)
 #' @param b1 hyperparameter of the prior distribution for beta. The default is 2.
 #' @param a2 hyperparameter of the prior distribution for alpha^2. The default is 3.
 #' @param b2 hyperparameter of the prior distribution for alpha^2. The default is 2.
-#' @param c a positive real number representing the cost of colect one aliquot. The default is 0.010.
+#' @param cost a positive real number representing the cost of colect one aliquot. The default is 0.010.
 #' @param rho a number in (0, 1). The probability of the credible interval is \eqn{1-rho}. Only
 #' for lost function 1. The default is 0.95. 
 #' @param gam a positive real number connected with the credible interval when using lost
@@ -159,7 +159,7 @@ rpost.bs <- function(N, x, a1, b1, a2, b2, r)
 #' @importFrom LearnBayes rigamma 
 #' @import ggplot2
 #' @importFrom stats lm
-bss.dt.bs <- function(loss = 'L1', a1 = 3, b1 = 2, a2 = 3, b2 = 2, cost = 0.010, rho = 0.95, gam = 0.5,
+bss.dt.bs <- function(loss = 'L1', a1 = 2.5, b1 = 100, a2 = 2.5, b2 = 100, cost = 0.01, rho = 0.05, gam = 0.25,
                       nmax = 1E2, nlag = 1E1, nrep = 1E2, lrep = 1E2, npost = 1E2, plots = FALSE, prints  = TRUE, ...) {
 
   cl <- match.call()
@@ -238,7 +238,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 3, b1 = 2, a2 = 3, b2 = 2, cost = 0.010,
   nmin <- ceiling((E*G/cost)^(1/(G + 1))-1)
   
 
-  if (plot == TRUE) {
+  if (plots == TRUE) {
     
     vx <- seq(0,nmax,l=100)
     curve <- function(x) {cost*x + E/((1 + x)^G)}
