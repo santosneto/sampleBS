@@ -4,8 +4,8 @@ Title: Bayesian sample size in a decision-theoretic approach for the Birbaum-Sau
 Version: 0.0.1
 Date: 2020-02-17
 Author: Manoel Santos Neto [aut, cre] and Eliador Costa[aut, cre]
-Maintainer: Manoel Santos Neto <mn.neco@gmail.com> and Eliardo Costa <eliardocosta@ccet.ufrn>
-Description: This package includes the estimation of the posterior distribution and obtention of the Bayesian optimum sample size.
+Maintainer: Manoel Santos Neto <mn.neco@gmail.com> and Eliardo Costa <eliardocosta@ccet.ufrn.br>
+Description: Optimal Bayesian sample size for estimating the mean of the Birbaum-Saunders distribution. Also, this package includes the random generation of the joint posterior distribution of the BS/inverse-gamma model.
 Depends: R (>= 3.1.2), LearnBayes, stats, ggplot2
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
