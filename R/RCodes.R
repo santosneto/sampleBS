@@ -240,12 +240,20 @@ bss.dt.bs <- function(loss = 'L1', a1 = 2.5, b1 = 100, a2 = 2.5, b2 = 100, cost 
 
   if (plots == TRUE) {
     
-    vx <- seq(0,nmax,l=100)
+   
+    
+    vx <- seq(max(nmin-0.4*nmin,0),nmin+0.6*nmin,by=0.01)
+    vx_max <- max(vx)
+    vx_min <- min(vx)
     curve <- function(x) {cost*x + E/((1 + x)^G)}
     vc <- mapply(curve, x=vx)
-    data0 <- data.frame(ns=ns,risk=risk)
+    #data0 <- data.frame(ns=ns.,risk=risk)
     data1 <- data.frame(obs=vx,ab=vc)
-    p <- ggplot(data0,aes(ns,risk)) + geom_point() + geom_line(color='blue',data=data1,aes(obs,ab)) + geom_vline(xintercept = nmin,colour='red') + xlim(0,nmax) + xlab("n") + ylab("TC(n)")
+    p <- ggplot() + geom_line(color='blue',data=data1,aes(obs,ab)) + geom_point(aes(x=nmin,y=curve(nmin) ),colour='red',size=4) + 
+      geom_segment(aes(x = nmin, y = min(vc)+0.2*sd(vc) , xend = nmin, yend =max(vc)-3*sd(vc)  ),arrow = arrow(length = unit(0.01, "npc"))) + 
+      geom_text()+
+      annotate("text",x=nmin,y=max(vc)-2.9*sd(vc),label='Optimal sample size', size =4) + 
+      xlim(vx_min,vx_max) + xlab("n") + ylab("TC(n)")
     
     print(p)
     
