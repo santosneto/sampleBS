@@ -1,6 +1,6 @@
 #' Random generation for the Birnbaum-Saunders distribution.
 #'
-#'@description The random generation for the Birnbaum-Saunders distribution.
+#'@description A function for generating values from the Birnbaum-Saunders distribution.
 #'
 #'@usage rbs(n=1.0, alpha = 0.5, beta = 1.0)
 #'
@@ -20,7 +20,7 @@
 #' 
 #' where Z follows a standard normal distribution.
 #' 
-#'@author Eliardo Costa \email{eliardo@ccet.ufrn} and Manoel Santos-Neto \email{manoel.ferreira@ufcg.edu.br}
+#'@author Eliardo G. Costa \email{eliardocosta@ccet.ufrn.br} and Manoel Santos-Neto \email{manoel.ferreira@ufcg.edu.br}
 #'
 #' 
 #'@examples 
@@ -45,9 +45,9 @@ rbs <- function(n=1.0, alpha=0.5, beta=1.0) {
 }
 
 
-#' Random generation for the posterior distribution of the Birnbaum-Saunders/inverse-gamma model.
+#' Random generation for the joint posterior distribution of the Birnbaum-Saunders/inverse-gamma model.
 #'
-#'@description The function for random generation of the posterior distribution of the Birnbaum-Saunders/inverse-gamma model.
+#'@description A function for generating values from the joint posterior distribution of the Birnbaum-Saunders/inverse-gamma model.
 #'
 #'
 #'@usage rpost.bs(N, x, a1, b1, a2, b2, r)
@@ -57,21 +57,21 @@ rbs <- function(n=1.0, alpha=0.5, beta=1.0) {
 #' @param a1 hyperparameter of the prior distribution for beta. 
 #' @param b1 hyperparameter of the prior distribution for beta.
 #' @param a2 hyperparameter of the prior distribution for \code{alpha^2}.
-#' @param b2 hyperparameter of the prior distribution for alpha^2.
+#' @param b2 hyperparameter of the prior distribution for \code{alpha^2}.
 #' @param r a positive constant for the sampling method. 
 #'
-#' @note We adapted the available R script (Supplementary Material) of Wang et. al. (2016). Wang et. al. (2016) shows that
+#' @note We adapted the available R script (Supplementary Material) of Wang et. al. (2016). These authors showed that
 #' a good choice of \code{r} should be an integer that is greater than or equal 1 and that the Bayesian estimation of the BS distribution
 #' is insensitive to the choice of \code{r}. Wang et. al. (2016) also shows that the best combinations of the hyperparameters should be taken \eqn{a1=b1=a2=b2 \neq 10^{-3}} 
 #' in order to use diffuse proper priors and obtain more stable results.
 #'
-#' @return A random sample of the posterior distribution of the model Birnbaum-Saunders/inverse-gamma. 
+#' @return A random sample of the joint posterior distribution of the model Birnbaum-Saunders/inverse-gamma model. 
 #' 
 #' @references 
 #' 
 #' Wang, M., Sun, X. and Park, C. (2016) Bayesian analysis of Birnbaum-Saunders distribution via the generalized ratio-of-uniforms methods. Comput. Stat. 31: 207--225.
 #' 
-#'@author Eliardo Costa \email{eliardo@ccet.ufrn} and Manoel Santos-Neto \email{manoel.ferreira@ufcg.edu.br}
+#'@author Eliardo G. Costa \email{eliardocosta@ccet.ufrn.br} and Manoel Santos-Neto \email{manoel.ferreira@ufcg.edu.br}
 #'
 #' @export
 #' 
@@ -117,9 +117,9 @@ rpost.bs <- function(N, x, a1, b1, a2, b2, r)
   return(output)
 }
 
-#' Bayesian sample size in a decision-theoretic approach for the Birbaum-Saunders/inverse-gamma model.
+#' Bayesian sample size in a decision-theoretic approach under the Birbaum-Saunders/inverse-gamma model.
 #'
-#'@description Function for Bayesian sample size determination via decision-theoretic approach for the Birbaum-Saunders/inverse-gamma model.
+#'@description A function to obtain the optimal Bayesian sample size via a decision-theoretic approach for estimating the mean of the Birbaum-Saunders distribution.
 #'
 #'@usage bss.dt.bs(loss = "L1", a1 = 2.5, b1 = 100, a2 = 2.5, 
 #'                 b2 = 100, cost=0.01, rho = 0.05, gam = 0.25,
@@ -129,13 +129,13 @@ rpost.bs <- function(N, x, a1, b1, a2, b2, r)
 #' @param loss L1 (Absolute loss), L2 (Quadratic loss), L3 (Weighted loss) and L4 (Half loss) representing the loss function used. The default is absolute loss function.
 #' @param a1 hyperparameter of the prior distribution for beta. The default is 3.
 #' @param b1 hyperparameter of the prior distribution for beta. The default is 2.
-#' @param a2 hyperparameter of the prior distribution for alpha^2. The default is 3.
-#' @param b2 hyperparameter of the prior distribution for alpha^2. The default is 2.
-#' @param cost a positive real number representing the cost of colect one aliquot. The default is 0.010.
+#' @param a2 hyperparameter of the prior distribution for \code{alpha^2}. The default is 3.
+#' @param b2 hyperparameter of the prior distribution for \code{alpha^2}. The default is 2.
+#' @param cost a positive real number representing the cost of colect one observation. The default is 0.010.
 #' @param rho a number in (0, 1). The probability of the credible interval is \eqn{1-rho}. Only
-#' for lost function 1. The default is 0.95. 
-#' @param gam a positive real number connected with the credible interval when using lost
-#' function 2. The default is 0.5.
+#' for loss function L3. The default is 0.95. 
+#' @param gam a positive real number connected with the credible interval when using loss
+#' function L4. The default is 0.5.
 #' @param nmax a positive integer representing the maximum number for compute the Bayes risk.
 #' Default is 100.
 #' @param nlag a positive integer representing the lag in the n's used to compute the Bayes risk. Default is 10.
@@ -145,12 +145,12 @@ rpost.bs <- function(N, x, a1, b1, a2, b2, r)
 #' @param plot Boolean. If TRUE (default) it plot the estimated Bayes risks and the fitted curve.
 #' @param ... Currently ignored.
 #'
-#' @return An integer representing the sample size.
+#' @return An integer representing the optimal sample size.
 #' 
 #' @references 
 #'Costa, E.G., Paulino, C.D., and Singer, J. M. (2019). Sample size determination to evaluate ballast water standards: a decision-theoretic approach. Tech. rept. University of Sao Paulo. 
 #'
-#'@author Eliardo Costa \email{eliardo@ccet.ufrn} and Manoel Santos-Neto \email{manoel.ferreira@ufcg.edu.br}
+#'@author Eliardo G. Costa \email{eliardocosta@ccet.ufrn.br} and Manoel Santos-Neto \email{manoel.ferreira@ufcg.edu.br}
 #'
 #'@examples  
 #'bss.dt.bs(loss="L1",plot=TRUE)
