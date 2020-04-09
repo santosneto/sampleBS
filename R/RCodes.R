@@ -159,7 +159,7 @@ rpost.bs <- function(N, x, a1, b1, a2, b2, r)
 #' @importFrom LearnBayes rigamma 
 #' @import ggplot2
 #' @importFrom stats lm
-bss.dt.bs <- function(loss = 'L1', a1 = 2.5, b1 = 100, a2 = 2.5, b2 = 100, cost = 0.01, rho = 0.05, gam = 0.25,nmax = 1E2, nlag = 1E1, nrep = 1E2, lrep = 1E2, npost = 1E2, plots = FALSE, prints  = TRUE, save.plot = FALSE) 
+bss.dt.bs <- function(loss = 'L1', a1 = 2.5, b1 = 100, a2 = 2.5, b2 = 100, cost = 0.01, rho = 0.05, gam = 0.25,nmax = 1E2, nlag = 1E1, nrep = 1E2, lrep = 1E2, npost = 1E2, plots = FALSE, prints  = TRUE, save.plot = FALSE,...) 
 {
 
   cl <- match.call()

@@ -39,9 +39,9 @@ Default is 100.}
 
 \item{npost}{a positive integer representing the number of values to draw from the posterior distribution of the mean. Default is 100.}
 
-\item{plot}{Boolean. If TRUE (default) it plot the estimated Bayes risks and the fitted curve.}
-
 \item{...}{Currently ignored.}
+
+\item{plot}{Boolean. If TRUE (default) it plot the estimated Bayes risks and the fitted curve.}
 }
 \value{
 An integer representing the optimal sample size.
