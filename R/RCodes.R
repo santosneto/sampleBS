@@ -159,8 +159,8 @@ rpost.bs <- function(N, x, a1, b1, a2, b2, r)
 #' @importFrom LearnBayes rigamma 
 #' @import ggplot2
 #' @importFrom stats lm
-bss.dt.bs <- function(loss = 'L1', a1 = 2.5, b1 = 100, a2 = 2.5, b2 = 100, cost = 0.01, rho = 0.05, gam = 0.25,
-                      nmax = 1E2, nlag = 1E1, nrep = 1E2, lrep = 1E2, npost = 1E2, plots = FALSE, prints  = TRUE, ...) {
+bss.dt.bs <- function(loss = 'L1', a1 = 2.5, b1 = 100, a2 = 2.5, b2 = 100, cost = 0.01, rho = 0.05, gam = 0.25,nmax = 1E2, nlag = 1E1, nrep = 1E2, lrep = 1E2, npost = 1E2, plots = FALSE, prints  = TRUE, save.plot = TRUE) 
+{
 
   cl <- match.call()
   ns <- rep(seq(3, nmax, by = nlag), each = nrep)
@@ -255,7 +255,20 @@ bss.dt.bs <- function(loss = 'L1', a1 = 2.5, b1 = 100, a2 = 2.5, b2 = 100, cost 
       annotate("text",x=nmin,y=max(vc)-2.9*sd(vc),label='Optimal sample size', size =4) + 
       xlim(vx_min,vx_max) + xlab("n") + ylab("TC(n)")
     
+    if(save.plot == FALSE){ 
     print(p)
+    }  
+    else{ 
+     
+      if(loss == 'L1'|| loss == 'L2'){
+      file.name <- paste('case',loss,a1,b1,cost,'.pdf',sep='_')
+      } else if(loss == 'L3'){
+      file.name <- paste('case',loss,a1,b1,cost,rho, '.pdf',sep='_')
+      } else{
+      file.name <- paste('case',loss,a1,b1,cost,gam,'.pdf',sep='_')
+      }
+    ggsave(file.name,p,dpi=300, width = 15, height = 10, units = "cm",device=cairo_pdf)
+    }
     
   }
   

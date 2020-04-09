@@ -17,7 +17,7 @@ rbs(n=1.0, alpha = 0.5, beta = 1.0)
 A sample of size n from the Birnbaum-Saunders distribution.
 }
 \description{
-The random generation for the Birnbaum-Saunders distribution.
+A function for generating values from the Birnbaum-Saunders distribution.
 }
 \details{
 The density function of the Birnbaum-Saunders distribution used in the function \code{rbs()} is
@@ -37,5 +37,5 @@ x
      
 }
 \author{
-Eliardo Costa \email{eliardo@ccet.ufrn} and Manoel Santos-Neto \email{manoel.ferreira@ufcg.edu.br}
+Eliardo G. Costa \email{eliardocosta@ccet.ufrn.br} and Manoel Santos-Neto \email{manoel.ferreira@ufcg.edu.br}
 }
