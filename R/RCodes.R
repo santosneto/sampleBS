@@ -77,7 +77,6 @@ rbs <- function(n=1.0, alpha=0.5, beta=1.0) {
 #' 
 #' @importFrom stats median optimize quantile rnorm runif var
  
-
 rpost.bs <- function(N, x, a1, b1, a2, b2, r) 
   {
   
@@ -245,14 +244,15 @@ bss.dt.bs <- function(loss = 'L1', a1 = 2.5, b1 = 100, a2 = 2.5, b2 = 100, cost 
     vx_min <- min(vx)
     curve <- function(x) {cost*x + E/((1 + x)^G)}
     vc <- mapply(curve, x=vx)
-    #data0 <- data.frame(ns=ns.,risk=risk)
+    data0 <- data.frame(ns=ns,risk=risk)
     data1 <- data.frame(obs=vx,ab=vc)
     
-    p <- ggplot() + geom_line(color='blue',data=data1,aes(obs,ab)) + geom_point(aes(x=nmin,y=curve(nmin) ),colour='red',size=4) + 
-      geom_segment(aes(x = nmin, y = min(vc)+0.2*sd(vc) , xend = nmin, yend =max(vc)-3*sd(vc)  ),arrow = arrow(length = unit(0.01, "npc"))) + 
-      geom_text()+
-      annotate("text",x=nmin,y=max(vc)-2.9*sd(vc),label='Optimal sample size', size =4) + 
-      xlim(vx_min,vx_max) + xlab("n") + ylab("TC(n)")
+    p <- ggplot(data0, aes(ns,risk)) + geom_point() 
+    #+ geom_line(color='blue',data=data1,aes(obs,ab)) + geom_point(aes(x=nmin,y=curve(nmin) ),colour='red',size=4) + 
+    #  geom_segment(aes(x = nmin, y = min(vc)+0.2*sd(vc) , xend = nmin, yend =max(vc)-3*sd(vc)  ),arrow = arrow(length = unit(0.01, "npc"))) + 
+    #  geom_text()+
+    #  annotate("text",x=nmin,y=max(vc)-2.9*sd(vc),label='Optimal sample size', size =4) + 
+    #  xlim(vx_min,vx_max) + xlab("n") + ylab("TC(n)")
    
     if(loss == 'L1'|| loss == 'L2'){
       file.name <- paste('case',loss,a1,b1,cost,'.pdf', sep='_')
