@@ -167,10 +167,10 @@ bss.dt.bs <- function(loss = 'L1', a1 = 2.5, b1 = 100, a2 = 2.5, b2 = 100, cost 
   if (loss == 'L2') { # quadratic loss
     risk <- sapply(ns, function(n) {
       loss <- sapply(seq_len(lrep), function(j) {
-        alpha2 <- rigamma(n = n, a = a2, b = b2)
+        alpha2 <- rigamma(n = 1, a = a2, b = b2)
         alpha <- sqrt(alpha2)
-        beta <- rigamma(n = n, a = a1, b = b1)
-        x <- rbs(n = 1, alpha = alpha, beta = beta)
+        beta <- rigamma(n = 1, a = a1, b = b1)
+        x <- rbs(n = n, alpha = alpha, beta = beta)
         post.xn <- rpost.bs(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2, r = max(1/(a1+a2+(1/2)) + 1E-3,1.0))
         mu.post <- post.xn[, 2]*(1 + post.xn[, 1]^2/2)
         out.loss <- var(mu.post) + cost*n
@@ -183,10 +183,10 @@ bss.dt.bs <- function(loss = 'L1', a1 = 2.5, b1 = 100, a2 = 2.5, b2 = 100, cost 
   if (loss == 'L1') { # absolute loss
     risk <- sapply(ns, function(n) {
       loss <- sapply(seq_len(lrep), function(j) {
-        alpha2 <- rigamma(n = n, a = a2, b = b2)
+        alpha2 <- rigamma(n = 1, a = a2, b = b2)
         alpha <- sqrt(alpha2)
-        beta <- rigamma(n = n, a = a1, b = b1)
-        x <- rbs(n = 1, alpha = alpha, beta = beta)
+        beta <- rigamma(n = 1, a = a1, b = b1)
+        x <- rbs(n = n, alpha = alpha, beta = beta)
         post.xn <- rpost.bs(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2, r = max(1/(a1+a2+(1/2)) + 1E-3,1.0)) 
         mu.post <- post.xn[, 2]*(1 + post.xn[, 1]^2/2)
         med.post <- median(mu.post)
@@ -200,10 +200,10 @@ bss.dt.bs <- function(loss = 'L1', a1 = 2.5, b1 = 100, a2 = 2.5, b2 = 100, cost 
   if (loss == 'L3') { # loss function for interval inference depending on rho
     risk <- sapply(ns, function(n) {
       loss <- sapply(seq_len(lrep), function(j) {
-        alpha2 <- rigamma(n = n, a = a2, b = b2)
+        alpha2 <- rigamma(n = 1, a = a2, b = b2)
         alpha <- sqrt(alpha2)
-        beta <- rigamma(n = n, a = a1, b = b1)
-        x <- rbs(n = 1, alpha = alpha, beta = beta)
+        beta <- rigamma(n = 1, a = a1, b = b1)
+        x <- rbs(n = n, alpha = alpha, beta = beta)
         post.xn <- rpost.bs(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2,b2 = b2, r = max(1/(a1+a2+(1/2)) + 1E-3,1.0)) 
         mu.post <- post.xn[, 2]*(1 + post.xn[, 1]^2/2)
         qs <- quantile(mu.post, probs = c(rho/2, 1 - rho/2))
@@ -217,10 +217,10 @@ bss.dt.bs <- function(loss = 'L1', a1 = 2.5, b1 = 100, a2 = 2.5, b2 = 100, cost 
   if (loss == 'L4') { # loss function for interval inference depending on gamma
     risk <- sapply(ns, function(n) {
       loss <- sapply(seq_len(lrep), function(j) {
-        alpha2 <- rigamma(n = n, a = a2, b = b2)
+        alpha2 <- rigamma(n = 1, a = a2, b = b2)
         alpha <- sqrt(alpha2)
-        beta <- rigamma(n = n, a = a1, b = b1)
-        x <- rbs(n = 1, alpha = alpha, beta = beta)
+        beta <- rigamma(n = 1, a = a1, b = b1)
+        x <- rbs(n = n, alpha = alpha, beta = beta)
         post.xn <- rpost.bs(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2,b2 = b2, r = max(1/(a1+a2+(1/2)) + 1E-3,1.0))
         mu.post <- post.xn[, 2]*(1 + post.xn[, 1]^2/2)
         out.loss <- 2*sqrt(gam*stats::var(mu.post)) + cost*n
@@ -280,5 +280,3 @@ bss.dt.bs <- function(loss = 'L1', a1 = 2.5, b1 = 100, a2 = 2.5, b2 = 100, cost 
   return(out)
   }
 }
-
-
