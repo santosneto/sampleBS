@@ -4,10 +4,30 @@
 \alias{bss.dt.bs}
 \title{Bayesian sample size in a decision-theoretic approach under the Birbaum-Saunders/inverse-gamma model.}
 \usage{
-bss.dt.bs(loss = "L1", a1 = 2.5, b1 = 100, a2 = 2.5, 
-                b2 = 100, cost=0.01, rho = 0.05, gam = 0.25,
-                nmax = 1E2, nlag = 1E1, nrep = 1E2, lrep = 1E2,
-                npost = 1E2, plots = FALSE, prints = TRUE, ...)
+bss.dt.bs(
+  loss = "L1",
+  a1 = 2.5,
+  b1 = 100,
+  a2 = 2.5,
+  b2 = 100,
+  cost = 0.01,
+  rho = 0.05,
+  gam = 1,
+  nmax = 100,
+  nlag = 5,
+  nrep = 10,
+  lrep = 100,
+  npost = 500,
+  nburn = 500,
+  thin = 20,
+  scale = 1,
+  plots = TRUE,
+  prints = TRUE,
+  save.plot = FALSE,
+  diag.if = TRUE,
+  path.diag = getwd(),
+  ...
+)
 }
 \arguments{
 \item{loss}{L1 (Absolute loss), L2 (Quadratic loss), L3 (Weighted loss) and L4 (Half loss) representing the loss function used. The default is absolute loss function.}
@@ -16,9 +36,9 @@ bss.dt.bs(loss = "L1", a1 = 2.5, b1 = 100, a2 = 2.5,
 
 \item{b1}{hyperparameter of the prior distribution for beta. The default is 2.}
 
-\item{a2}{hyperparameter of the prior distribution for \code{alpha^2}. The default is 3.}
+\item{a2}{hyperparameter of the prior distribution for \code{shape^2}. The default is 3.}
 
-\item{b2}{hyperparameter of the prior distribution for \code{alpha^2}. The default is 2.}
+\item{b2}{hyperparameter of the prior distribution for \code{shape^2}. The default is 2.}
 
 \item{cost}{a positive real number representing the cost of colect one observation. The default is 0.010.}
 
@@ -39,9 +59,23 @@ Default is 100.}
 
 \item{npost}{a positive integer representing the number of values to draw from the posterior distribution of the mean. Default is 100.}
 
-\item{...}{Currently ignored.}
+\item{nburn}{x}
 
-\item{plot}{Boolean. If TRUE (default) it plot the estimated Bayes risks and the fitted curve.}
+\item{thin}{x}
+
+\item{scale}{x}
+
+\item{plots}{Boolean. If TRUE (default) it plot the estimated Bayes risks and the fitted curve.}
+
+\item{prints}{Boolean. If FALSE (default) the output is a list.}
+
+\item{save.plot}{Boolean. If TRUE, the plot is saved to an external file. The default is FALSE.}
+
+\item{diag.if}{x}
+
+\item{path.diag}{x}
+
+\item{...}{Currently ignored.}
 }
 \value{
 An integer representing the optimal sample size.
@@ -51,7 +85,7 @@ A function to obtain the optimal Bayesian sample size via a decision-theoretic a
 }
 \examples{
  
-bss.dt.bs(loss="L1",plot=TRUE)
+#bss.dt.bs(loss="L1", plot=TRUE, lrep=10, npost=10)
 
 }
 \references{

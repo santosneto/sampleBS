@@ -4,7 +4,7 @@
 \alias{rbs}
 \title{Random generation for the Birnbaum-Saunders distribution.}
 \usage{
-rbs(n=1.0, alpha = 0.5, beta = 1.0)
+rbs(n = 1, alpha = 0.5, beta = 1)
 }
 \arguments{
 \item{n}{number of observations. If \code{length(n) > 1}, the length is taken to be the number required.}
@@ -32,7 +32,7 @@ If X is Birnbaum-Saunders distributed then
 where Z follows a standard normal distribution.
 }
 \examples{
-x <- rbs(n=10, alpha = 10, beta = 2.0) 
+x <- rbs(n=10, a = 10, b = 2.0) 
 x   
      
 }

@@ -1,8 +1,11 @@
-#' Random generation for the Birnbaum-Saunders distribution.
+#'@name rbs
+#'
+#'@aliases rbs
+#'
+#'@title Random generation for the Birnbaum-Saunders distribution.
 #'
 #'@description A function for generating values from the Birnbaum-Saunders distribution.
 #'
-#'@usage rbs(n=1.0, alpha = 0.5, beta = 1.0)
 #'
 #'@param n number of observations. If \code{length(n) > 1}, the length is taken to be the number required.
 #'@param alpha vector of shape parameter values.
@@ -24,12 +27,13 @@
 #'
 #' 
 #'@examples 
-#' x <- rbs(n=10, alpha = 10, beta = 2.0) 
+#' x <- rbs(n=10, a = 10, b = 2.0) 
 #' x   
 #'      
 #' @export
-
-
+#' 
+#' @importFrom stats rnorm
+ 
 rbs <- function(n=1.0, alpha=0.5, beta=1.0) {
   if (n == 1) {
     x <- numeric()
@@ -44,26 +48,56 @@ rbs <- function(n=1.0, alpha=0.5, beta=1.0) {
   return(x)
 }
 
+#'@name logp.beta
+#'@aliases logp.beta
+#'@title x
+#'@description x
+#'
+#'
+#' @param beta scale parameter.
+#' @param x vector of observed values of the model.
+#' @param a1 hyperparameter of the prior distribution for beta. 
+#' @param b1 hyperparameter of the prior distribution for beta.
+#' @param a2 hyperparameter of the prior distribution for \code{shape^2}.
+#' @param b2 hyperparameter of the prior distribution for \code{shape^2}.
+#'
+#'@return The log da marginal posterior of beta
+#'
+#'@export
+logp.beta <- function(beta, x, a1, b1, a2, b2) {
+  n <- length(x)
+  if (beta > 0) {
+    out <- (-(n + a1 + 1) * log(beta) - b1/beta + 
+              sum(log((beta/x)^(1/2) + (beta/x)^(3/2))) - 
+              ((n + 1)/2 + a2) * log(sum(1/2 * (x/beta + beta/x - 2)) + b2))
+  } else {
+    out <- -Inf
+  }
+  return(out)
+}
 
-#' Random generation for the joint posterior distribution of the Birnbaum-Saunders/inverse-gamma model.
+
+#'@name rbeta.post
+#'
+#'@aliases rbeta.post
+#'
+#'@title Random generation for the joint posterior distribution of the Birnbaum-Saunders/inverse-gamma model.
 #'
 #'@description A function for generating values from the joint posterior distribution of the Birnbaum-Saunders/inverse-gamma model.
 #'
-#'
-#'@usage rpost.bs(N, x, a1, b1, a2, b2, r)
 #'
 #' @param N number of observations.
 #' @param x vector of observed values of the model.
 #' @param a1 hyperparameter of the prior distribution for beta. 
 #' @param b1 hyperparameter of the prior distribution for beta.
-#' @param a2 hyperparameter of the prior distribution for \code{alpha^2}.
-#' @param b2 hyperparameter of the prior distribution for \code{alpha^2}.
-#' @param r a positive constant for the sampling method. 
+#' @param a2 hyperparameter of the prior distribution for \code{shape^2}.
+#' @param b2 hyperparameter of the prior distribution for \code{shape^2}.
+#' @param burnin a positive constant for the sampling method. 
+#' @param thin a positive constant for the sampling method.
+#' @param start a positive constant for the sampling method. 
+#' @param varcov a positive constant for the sampling method. 
+#' @param scale a positive constant for the sampling method.  
 #'
-#' @note We adapted the available R script (Supplementary Material) of Wang et. al. (2016). These authors showed that
-#' a good choice of \code{r} should be an integer that is greater than or equal 1 and that the Bayesian estimation of the BS distribution
-#' is insensitive to the choice of \code{r}. Wang et. al. (2016) also shows that the best combinations of the hyperparameters should be taken \eqn{a1=b1=a2=b2 \neq 10^{-3}} 
-#' in order to use diffuse proper priors and obtain more stable results.
 #'
 #' @return A random sample of the joint posterior distribution of the model Birnbaum-Saunders/inverse-gamma model. 
 #' 
@@ -73,63 +107,34 @@ rbs <- function(n=1.0, alpha=0.5, beta=1.0) {
 #' 
 #'@author Eliardo G. Costa \email{eliardocosta@ccet.ufrn.br} and Manoel Santos-Neto \email{manoel.ferreira@ufcg.edu.br}
 #'
-#' @export
+#'@export
 #' 
-#' @importFrom stats median optimize quantile rnorm runif var
+#'@importFrom LearnBayes  rwmetrop 
  
-rpost.bs <- function(N, x, a1, b1, a2, b2, r) 
-  {
-  
-  n <- length(x)
-  
-  betaLog <- function(b) {
-    (1/(r + 1)) * (-(n + a1 + 1) * log(b) - b1/b + sum(log((b/x)^(1/2) +
-                                                           (b/x)^(3/2))) - ((n + 1)/2 + a2) * log(sum(1/2 * (x/b + b/x - 2)) + b2))
-  }
-  betafLog <- function(b) {
-    log(b) + (r/(r + 1)) * (-(n + a1 + 1) * log(b) - b1/b + sum(log((b/x)^(1/2) 
-                                                                  + (b/x)^(3/2))) - ((n + 1)/2 + a2) * log(sum(1/2 * (x/b + b/x - 2)) + b2))
-  }
-  
-  a.max <- optimize(betaLog, lower = 0, upper = 1E20, maximum = TRUE)$objective
-  b.max <- optimize(betafLog, lower = 0, upper = 1E20, maximum = TRUE)$objective
-  
-  a.val <- b.val <- rep(0, N)
-  for (j in 1:N) {
-    U <- runif(1, 0, exp(a.max))
-    V <- runif(1, 0, exp(b.max))
-    rho <- V/(U^r)
-    while (log(U) > betaLog(rho)) {
-      U <- runif(1, 0, exp(a.max))
-      V <- runif(1, 0, exp(b.max))
-      rho <- V/(U^r)
-    }
-    b.val[j] <- rho
-    a.val[j] <- rigamma(1, n/2 + a2, sum(x/rho + rho/x - 2)/2 + b2)
-  }
-  #cred.a <- emp.hpd(sqrt(a.val), conf = cred.level)
-  #cred.b <- emp.hpd(b.val, conf = cred.level)
-  alpha <- sqrt(a.val) #c(median(sqrt(a.val)), sd(sqrt(a.val)), cred.a)
-  beta <-  b.val #c(median(b.val), sd(b.val), cred.b)
-  output <- cbind(alpha, beta)
-  #colnames(output) <- c("Median", "SD", "Lower", "Upper")
-  return(output)
+rbeta.post <- function(N, x, a1, b1, a2, b2, burnin, thin, start,
+                       varcov, scale = 1) {
+  prop <- list(var = varcov, scale = scale) # parametros da dist. proposta
+  sam.post <- rwmetrop(logpost = logp.beta, proposal = prop, 
+                       start = start, m = burnin + N*thin, 
+                       x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2)
+  beta <- as.vector(sam.post$par[burnin + (1:N)*thin,])
+  out <- list(sam = beta, accept = sam.post$accept)
+  return(out)
 }
 
-#' Bayesian sample size in a decision-theoretic approach under the Birbaum-Saunders/inverse-gamma model.
+#'@name bss.dt.bs
+#'
+#'@aliases bss.dt.bs
+#'
+#'@title Bayesian sample size in a decision-theoretic approach under the Birbaum-Saunders/inverse-gamma model.
 #'
 #'@description A function to obtain the optimal Bayesian sample size via a decision-theoretic approach for estimating the mean of the Birbaum-Saunders distribution.
-#'
-#'@usage bss.dt.bs(loss = "L1", a1 = 2.5, b1 = 100, a2 = 2.5, 
-#'                 b2 = 100, cost=0.01, rho = 0.05, gam = 0.25,
-#'                 nmax = 1E2, nlag = 1E1, nrep = 1E2, lrep = 1E2,
-#'                 npost = 1E2, plots = FALSE, prints = TRUE, ...)
 #'
 #' @param loss L1 (Absolute loss), L2 (Quadratic loss), L3 (Weighted loss) and L4 (Half loss) representing the loss function used. The default is absolute loss function.
 #' @param a1 hyperparameter of the prior distribution for beta. The default is 3.
 #' @param b1 hyperparameter of the prior distribution for beta. The default is 2.
-#' @param a2 hyperparameter of the prior distribution for \code{alpha^2}. The default is 3.
-#' @param b2 hyperparameter of the prior distribution for \code{alpha^2}. The default is 2.
+#' @param a2 hyperparameter of the prior distribution for \code{shape^2}. The default is 3.
+#' @param b2 hyperparameter of the prior distribution for \code{shape^2}. The default is 2.
 #' @param cost a positive real number representing the cost of colect one observation. The default is 0.010.
 #' @param rho a number in (0, 1). The probability of the credible interval is \eqn{1-rho}. Only
 #' for loss function L3. The default is 0.95. 
@@ -141,8 +146,16 @@ rpost.bs <- function(N, x, a1, b1, a2, b2, r)
 #' @param nrep a positive integer representing the number of samples taken for each \eqn{n}.
 #' @param lrep a positive integer representing the number of samples taken for \eqn{S_n}. Default is 100.
 #' @param npost a positive integer representing the number of values to draw from the posterior distribution of the mean. Default is 100.
-#' @param plot Boolean. If TRUE (default) it plot the estimated Bayes risks and the fitted curve.
+#' @param plots Boolean. If TRUE (default) it plot the estimated Bayes risks and the fitted curve.
+#' @param prints Boolean. If FALSE (default) the output is a list. 
+#' @param nburn x
+#' @param thin x
+#' @param scale x
+#' @param diag.if x
+#' @param path.diag x
+#' @param save.plot Boolean. If TRUE, the plot is saved to an external file. The default is FALSE.    
 #' @param ... Currently ignored.
+#' 
 #'
 #' @return An integer representing the optimal sample size.
 #' 
@@ -152,131 +165,254 @@ rpost.bs <- function(N, x, a1, b1, a2, b2, r)
 #'@author Eliardo G. Costa \email{eliardocosta@ccet.ufrn.br} and Manoel Santos-Neto \email{manoel.ferreira@ufcg.edu.br}
 #'
 #'@examples  
-#'bss.dt.bs(loss="L1",plot=TRUE)
+#' #bss.dt.bs(loss="L1", plot=TRUE, lrep=10, npost=10)
 #'
 #' @export
-#' @importFrom LearnBayes rigamma 
+#' @importFrom LearnBayes rigamma laplace
 #' @import ggplot2
-#' @importFrom stats lm
-bss.dt.bs <- function(loss = 'L1', a1 = 2.5, b1 = 100, a2 = 2.5, b2 = 100, cost = 0.01, rho = 0.05, gam = 0.25,nmax = 1E2, nlag = 1E1, nrep = 1E2, lrep = 1E2, npost = 1E2, plots = FALSE, prints  = TRUE, save.plot = FALSE,...) 
-{
+#' @importFrom graphics par plot
+#' @importFrom stats lm acf plot.ts median quantile rnorm var
+#' @importFrom grDevices cairo_pdf pdf dev.off
+#' @importFrom progress progress_bar
 
+
+bss.dt.bs <- function(loss = 'L1', a1 = 2.5, b1 = 1E2, a2 = 2.5, b2 = 1E2, 
+                      cost = 0.01, rho = 0.05, gam = 1, nmax = 1E2, 
+                      nlag = 5E0, nrep = 1E1, lrep = 1E2, npost = 5E2, 
+                      nburn = 5E2, thin = 20, scale = 1,
+                      plots = TRUE, prints = TRUE, save.plot = FALSE, diag.if = TRUE,
+                      path.diag = getwd(), ...) 
+{
+  diag.name <- loss
   cl <- match.call()
-  ns <- rep(seq(3, nmax, by = nlag), each = nrep)
-  if (loss == 'L2') { # quadratic loss
-    risk <- sapply(ns, function(n) {
-      loss <- sapply(seq_len(lrep), function(j) {
-        alpha2 <- rigamma(n = 1, a = a2, b = b2)
-        alpha <- sqrt(alpha2)
-        beta <- rigamma(n = 1, a = a1, b = b1)
-        x <- rbs(n = n, alpha = alpha, beta = beta)
-        post.xn <- rpost.bs(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2, r = max(1/(a1+a2+(1/2)) + 1E-3,1.0))
-        mu.post <- post.xn[, 2]*(1 + post.xn[, 1]^2/2)
-        out.loss <- var(mu.post) + cost*n
-        return(out.loss)
-      })
-      out.risk <- mean(loss)
-      return(out.risk)
-    })
-  }
+  ns <- rep(seq(2, nmax, by = nlag), each = nrep)
+  risk <- numeric()
+  accept <- numeric()
   if (loss == 'L1') { # absolute loss
-    risk <- sapply(ns, function(n) {
-      loss <- sapply(seq_len(lrep), function(j) {
+  numIterations <- length(ns)
+  pb <- progress::progress_bar$new(format = "  run [:bar] :percent eta: :eta", total = numIterations, clear = FALSE, width= 60)
+  for (n in ns) {
+    pb$tick()
+    Sys.sleep(1 / numIterations)
+    loss <- numeric()
+      for (j in 1:lrep) {        
         alpha2 <- rigamma(n = 1, a = a2, b = b2)
         alpha <- sqrt(alpha2)
         beta <- rigamma(n = 1, a = a1, b = b1)
         x <- rbs(n = n, alpha = alpha, beta = beta)
-        post.xn <- rpost.bs(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2, r = max(1/(a1+a2+(1/2)) + 1E-3,1.0)) 
-        mu.post <- post.xn[, 2]*(1 + post.xn[, 1]^2/2)
-        med.post <- median(mu.post)
-        out.loss <- mean(abs(mu.post - med.post)) + cost*n
-        return(out.loss)
-      })
-      out.risk <- mean(loss)
-      return(out.risk)
-    })
-  }
-  if (loss == 'L3') { # loss function for interval inference depending on rho
-    risk <- sapply(ns, function(n) {
-      loss <- sapply(seq_len(lrep), function(j) {
+        lapla <- laplace(logpost = logp.beta, mode = median(x), x = x, a1 = a1, b1 = b1,
+                         a2 = a2, b2 = b2)
+        beta.pos <- rbeta.post(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2,
+                               burnin = nburn, thin = thin, start = median(x), 
+                               varcov = lapla$var, scale = scale)
+        if (diag.if == TRUE) {
+          if (n == ns[nrep + 1] && j == 1) {
+            graph_name <- paste(path.diag, "diag_", diag.name, 
+                                ".pdf", sep = "")
+            pdf(graph_name)
+            par(mfrow = c(2, 1))
+            plot.ts(beta.pos$sam, xlab = "iteration", ylab = "")
+            acf(beta.pos$sam, main = "")
+            dev.off()
+            par(mfrow = c(1, 1))
+            diag.if <- FALSE
+          }
+        }
+        lam.pos <- numeric()
+        for (k in 1:length(beta.pos$sam)) {
+          lam.pos[k] <- rigamma(n = 1, a = (n + 1)/2 + a2, 
+                                b = b2 + sum(0.5*(x/beta.pos$sam[k] + beta.pos$sam[k]/x - 2)))
+        }
+        theta.pos <- beta.pos$sam*(1 + lam.pos/2) 
+        
+        medi.pos <- median(theta.pos)
+        loss <- append(loss, mean(abs(theta.pos - medi.pos)) + cost*n)
+        accept <- append(accept, beta.pos$accept)
+      }
+      risk <- append(risk, mean(loss))
+    }
+  } else if (loss == 'L2') { # quadratic loss ATUALIZANDO
+    numIterations <- length(ns)
+    pb <- progress::progress_bar$new(format = "  run [:bar] :percent eta: :eta", total = numIterations, clear = FALSE, width= 60)
+    for (n in ns) {
+      pb$tick()
+      Sys.sleep(1 / numIterations)
+      loss <- numeric()
+      for (j in 1:lrep) {
         alpha2 <- rigamma(n = 1, a = a2, b = b2)
         alpha <- sqrt(alpha2)
         beta <- rigamma(n = 1, a = a1, b = b1)
         x <- rbs(n = n, alpha = alpha, beta = beta)
-        post.xn <- rpost.bs(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2,b2 = b2, r = max(1/(a1+a2+(1/2)) + 1E-3,1.0)) 
-        mu.post <- post.xn[, 2]*(1 + post.xn[, 1]^2/2)
-        qs <- quantile(mu.post, probs = c(rho/2, 1 - rho/2))
-        out.loss <- sum(mu.post[which(mu.post > qs[2])])/npost - sum(mu.post[which(mu.post < qs[1])])/npost + cost*n
-        return(out.loss)
-      })
-      out.risk <- mean(loss)
-      return(out.risk)
-    })
-  }
-  if (loss == 'L4') { # loss function for interval inference depending on gamma
-    risk <- sapply(ns, function(n) {
-      loss <- sapply(seq_len(lrep), function(j) {
+        lapla <- laplace(logpost = logp.beta, mode = median(x), x = x, a1 = a1, b1 = b1,
+                         a2 = a2, b2 = b2)
+        beta.pos <- rbeta.post(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2,
+                               burnin = nburn, thin = thin, start = median(x), 
+                               varcov = lapla$var, scale = scale)
+        if (diag.if == TRUE) {
+          if (n == ns[nrep + 1] && j == 1) {
+            graph_name <- paste(path.diag, "diag_", diag.name, 
+                                ".pdf", sep = "")
+            pdf(graph_name)
+            par(mfrow = c(2, 1))
+            plot.ts(beta.pos$sam, xlab = "iteration", ylab = "")
+            acf(beta.pos$sam, main = "")
+            dev.off()
+            par(mfrow = c(1, 1))
+            diag.if <- FALSE
+          }
+        }
+        lam.pos <- numeric()
+        for (k in 1:length(beta.pos$sam)) {
+          lam.pos[k] <- rigamma(n = 1, a = (n + 1)/2 + a2, 
+                                b = b2 + sum(0.5*(x/beta.pos$sam[k] + beta.pos$sam[k]/x - 2)))
+        }
+        theta.pos <- beta.pos$sam*(1 + lam.pos/2) 
+        loss <- append(loss, var(theta.pos) + cost*n)
+        accept <- append(accept, beta.pos$accept)
+      }
+      risk <- append(risk, mean(loss))
+    }
+  } else if (loss == 'L3') { # loss function for interval inference depending on rho
+    numIterations <- length(ns)
+    pb <- progress::progress_bar$new(format = "  run [:bar] :percent eta: :eta", total = numIterations, clear = FALSE, width= 60)
+    for (n in ns) {
+      pb$tick()
+      Sys.sleep(1 / numIterations)
+      loss <- numeric()
+      for (j in 1:lrep) {
         alpha2 <- rigamma(n = 1, a = a2, b = b2)
         alpha <- sqrt(alpha2)
         beta <- rigamma(n = 1, a = a1, b = b1)
         x <- rbs(n = n, alpha = alpha, beta = beta)
-        post.xn <- rpost.bs(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2,b2 = b2, r = max(1/(a1+a2+(1/2)) + 1E-3,1.0))
-        mu.post <- post.xn[, 2]*(1 + post.xn[, 1]^2/2)
-        out.loss <- 2*sqrt(gam*stats::var(mu.post)) + cost*n
-        return(out.loss)
-      })
-      out.risk <- mean(loss)
-      return(out.risk)
-    })
+        lapla <- laplace(logpost = logp.beta, mode = median(x), x = x, a1 = a1, b1 = b1,
+                         a2 = a2, b2 = b2)
+        beta.pos <- rbeta.post(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2,
+                               burnin = nburn, thin = thin, start = median(x), 
+                               varcov = lapla$var, scale = scale)
+        if (diag.if == TRUE) {
+          if (n == ns[nrep + 1] && j == 1) {
+            graph_name <- paste(path.diag, "diag_", diag.name, 
+                                ".pdf", sep = "")
+            pdf(graph_name)
+            par(mfrow = c(2, 1))
+            plot.ts(beta.pos$sam, xlab = "iteration", ylab = "")
+            acf(beta.pos$sam, main = "")
+            dev.off()
+            par(mfrow = c(1, 1))
+            diag.if <- FALSE
+          }
+        }
+        lam.pos <- numeric()
+        for (k in 1:length(beta.pos$sam)) {
+          lam.pos[k] <- rigamma(n = 1, a = (n + 1)/2 + a2, 
+                                b = b2 + sum(0.5*(x/beta.pos$sam[k] + beta.pos$sam[k]/x - 2)))
+        }
+        theta.pos <- beta.pos$sam*(1 + lam.pos/2)
+        qs <- quantile(theta.pos, probs = c(rho/2, 1 - rho/2))
+        loss <- append(loss, sum(theta.pos[which(theta.pos > qs[2])])/npost - sum(theta.pos[which(theta.pos < qs[1])])/npost + cost*n)
+        accept <- append(accept, beta.pos$accept)
+      }
+      risk <- append(risk, mean(loss))
+    }
+  } else if (loss == 'L4') { # loss function for interval inference depending on gamma
+    numIterations <- length(ns)
+    pb <- progress::progress_bar$new(format = "  run [:bar] :percent eta: :eta", total = numIterations, clear = FALSE, width= 60)
+    for (n in ns) {
+      pb$tick()
+      Sys.sleep(1 / numIterations)
+      loss <- numeric()
+      for (j in 1:lrep) {
+        alpha2 <- rigamma(n = 1, a = a2, b = b2)
+        alpha <- sqrt(alpha2)
+        beta <- rigamma(n = 1, a = a1, b = b1)
+        x <- rbs(n = n, alpha = alpha, beta = beta)
+        lapla <- laplace(logpost = logp.beta, mode = median(x), x = x, a1 = a1, b1 = b1,
+                         a2 = a2, b2 = b2)
+        beta.pos <- rbeta.post(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2,
+                               burnin = nburn, thin = thin, start = median(x), 
+                               varcov = lapla$var, scale = scale)
+        if (diag.if == TRUE) {
+          if (n == ns[nrep + 1] && j == 1) {
+            graph_name <- paste(path.diag, "diag_", diag.name, 
+                                ".pdf", sep = "")
+            pdf(graph_name)
+            par(mfrow = c(2, 1))
+            plot.ts(beta.pos$sam, xlab = "iteration", ylab = "")
+            acf(beta.pos$sam, main = "")
+            dev.off()
+            par(mfrow = c(1, 1))
+            diag.if <- FALSE
+          }
+        }
+        lam.pos <- numeric()
+        for (k in 1:length(beta.pos$sam)) {
+          lam.pos[k] <- rigamma(n = 1, a = (n + 1)/2 + a2, 
+                                b = b2 + sum(0.5*(x/beta.pos$sam[k] + beta.pos$sam[k]/x - 2)))
+        }
+        theta.pos <- beta.pos$sam*(1 + lam.pos/2)
+        loss <- append(loss, 2*sqrt(gam*var(theta.pos)) + cost*n)
+        accept <- append(accept, beta.pos$accept)
+      }
+      risk <- append(risk, mean(loss))
+    }
   }
-  
-  Y <- log(risk - cost*ns)
-  fit <- lm(Y ~ I(log(ns + 1)))
+  Z <- log(risk - cost*ns)
+  fit <- lm(Z ~ I(log(ns + 1)))
   E <- as.numeric(exp(fit$coef[1]))
   G <- as.numeric(-fit$coef[2])
-  nmin <- ceiling((E*G/cost)^(1/(G + 1))-1)
+  nmin <- ceiling((E*G/cost)^(1/(G + 1)) - 1)
   
-
   if (plots == TRUE) {
     
-    vx <- seq(max(nmin-0.4*nmin,0),nmin+0.6*nmin,by=0.01)
-    vx_max <- max(vx)
-    vx_min <- min(vx)
-    curve <- function(x) {cost*x + E/((1 + x)^G)}
-    vc <- mapply(curve, x=vx)
-    data0 <- data.frame(ns=ns,risk=risk)
-    data1 <- data.frame(obs=vx,ab=vc)
+    plot(ns, risk, xlim = c(0, max(ns) + 1), 
+         ylim = c(min(risk) - 0.5, max(risk) + 0.5), 
+         xlab = "n", ylab = "TC(n)")
+    curve <- function(x) {cost*x + E/(1 + x)^G}
+    plot(function(x)curve(x), 0, max(ns) + 1, col = "blue", add = TRUE)
+    graphics::abline(v = nmin, col = "red")
     
-    p <- ggplot(data0, aes(ns,risk)) + geom_point() 
-    #+ geom_line(color='blue',data=data1,aes(obs,ab)) + geom_point(aes(x=nmin,y=curve(nmin) ),colour='red',size=4) + 
+    # vx <- seq(max(nmin-0.4*nmin,0),nmin+0.6*nmin,by=0.01)
+    # vx_max <- max(vx)
+    # vx_min <- min(vx)
+    # curve <- function(x) {cost*x + E/((1 + x)^G)}
+    # vc <- mapply(curve, x=vx)
+    # data0 <- data.frame(ns=ns,risk=risk)
+    # data1 <- data.frame(obs=vx,ab=vc)
+    # 
+    # p <- ggplot(data0, aes(ns,risk)) + geom_point() + 
+    # geom_line(color='blue',data=data1,aes(obs,ab)) +
+    # geom_point(aes(x=nmin,y=curve(nmin) ),colour='red',size=4) #+ 
     #  geom_segment(aes(x = nmin, y = min(vc)+0.2*sd(vc) , xend = nmin, yend =max(vc)-3*sd(vc)  ),arrow = arrow(length = unit(0.01, "npc"))) + 
     #  geom_text()+
     #  annotate("text",x=nmin,y=max(vc)-2.9*sd(vc),label='Optimal sample size', size =4) + 
     #  xlim(vx_min,vx_max) + xlab("n") + ylab("TC(n)")
-   
-    if(loss == 'L1'|| loss == 'L2'){
-      file.name <- paste('case',loss,a1,b1,cost,'.pdf', sep='_')
-    } else if(loss == 'L3'){
-      file.name <- paste('case',loss,a1,b1,cost,rho, '.pdf', sep='_')
-    } else{
-      file.name <- paste('case',loss,a1,b1,cost,gam,'.pdf', sep='_')
-    }
-     
-    if(save.plot == FALSE) print(p) else ggsave(file.name,p,dpi=300, width = 15, height = 10, units = "cm",device=cairo_pdf)
     
+    #if(loss == 'L1'|| loss == 'L2'){
+    #  file.name <- paste('case',loss,a,b,cost,'.pdf', sep='_')
+    #} else if(loss == 'L3'){
+    #  file.name <- paste('case',loss,a,b,cost,rho, '.pdf', sep='_')
+    #} else{
+    #  file.name <- paste('case',loss,a,b,cost,gam,'.pdf', sep='_')
+    #}
+    
+    #if(save.plot == FALSE) print(p) else ggsave(file.name,p,dpi=300, width = 15, height = 10, units = "cm",device=cairo_pdf)
     
   }
   
   if(prints == TRUE)
   {  
-  # Output
-  cat("\nCall:\n")
-  print(cl)
-  cat("\nSample size:\n")
-  cat("n  = ", nmin, "\n")
+    # Output
+    cat("\nCall:\n")
+    print(cl)
+    cat("\nSample size:\n")
+    cat("n  = ", nmin, "\n")
+    cat("---------------\n")
+    cat("accept = ", mean(accept), "\n")
   }else{ 
-   out <- list(n = nmin, risk=risk, cost=cost, loss = loss, E=E, G=G)
-  
-  return(out)
+    out <- list(n = nmin, risk=risk, cost=cost, loss = loss, E=E, G=G)
+    
+    return(out)
   }
 }
+
+

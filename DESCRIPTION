@@ -6,7 +6,7 @@ Date: 2020-02-17
 Author: Manoel Santos Neto [aut, cre] and Eliador Costa[aut, cre]
 Maintainer: Manoel Santos Neto <mn.neco@gmail.com> and Eliardo Costa <eliardocosta@ccet.ufrn.br>
 Description: Optimal Bayesian sample size for estimating the mean of the Birbaum-Saunders distribution. Also, this package includes the random generation of the joint posterior distribution of the BS/inverse-gamma model.
-Depends: R (>= 3.1.2), LearnBayes, stats, ggplot2
+Depends: R (>= 3.1.2), LearnBayes, stats, ggplot2, progress
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
