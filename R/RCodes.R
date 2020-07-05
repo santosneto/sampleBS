@@ -148,10 +148,10 @@ rbeta.post <- function(N, x, a1, b1, a2, b2, burnin, thin, start,
 #' @param npost a positive integer representing the number of values to draw from the posterior distribution of the mean. Default is 100.
 #' @param plots Boolean. If TRUE (default) it plot the estimated Bayes risks and the fitted curve.
 #' @param prints Boolean. If FALSE (default) the output is a list. 
-#' @param nburn x
-#' @param thin x
-#' @param scale x
-#' @param diag.if x
+#' @param nburn a positive constant for the sampling method.
+#' @param thin a positive constant for the sampling method.
+#' @param scale a positive constant for the sampling method. 
+#' @param diag.name x
 #' @param path.diag x
 #' @param save.plot Boolean. If TRUE, the plot is saved to an external file. The default is FALSE.    
 #' @param ... Currently ignored.
@@ -173,189 +173,154 @@ rbeta.post <- function(N, x, a1, b1, a2, b2, burnin, thin, start,
 #' @importFrom graphics par plot
 #' @importFrom stats lm acf plot.ts median quantile rnorm var
 #' @importFrom grDevices cairo_pdf pdf dev.off
-#' @importFrom progress progress_bar
+#' @importFrom pbmcapply pbmcmapply
+#' @importFrom parallel detectCores
+#' @import dplyr 
+#' @import magrittr
+#' @importFrom graphics legend points
 
-
-bss.dt.bs <- function(loss = 'L1', a1 = 2.5, b1 = 1E2, a2 = 2.5, b2 = 1E2, 
-                      cost = 0.01, rho = 0.05, gam = 1, nmax = 1E2, 
-                      nlag = 5E0, nrep = 1E1, lrep = 1E2, npost = 5E2, 
-                      nburn = 5E2, thin = 20, scale = 1,
-                      plots = TRUE, prints = TRUE, save.plot = FALSE, diag.if = TRUE,
-                      path.diag = getwd(), ...) 
+bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50, 
+                      cost = 0.01, rho = 0.05, gam = 1, nmax = 2E3, 
+                      nlag = 2E2, nrep = 6L, lrep = 1E2, npost = 5E2, 
+                      nburn = 5E2, thin = 20L, scale = 1L,
+                      plots = TRUE, prints = TRUE, save.plot = FALSE,
+                      path.diag = getwd(), diag.name='plot', ...) 
 {
-  diag.name <- loss
   cl <- match.call()
   ns <- rep(seq(2, nmax, by = nlag), each = nrep)
-  risk <- numeric()
-  accept <- numeric()
+  nprint <- ns[nrep+1]
+  a <- b <- NULL
+  
   if (loss == 'L1') { # absolute loss
-  numIterations <- length(ns)
-  pb <- progress::progress_bar$new(format = "  run [:bar] :percent eta: :eta", total = numIterations, clear = FALSE, width= 60)
-  for (n in ns) {
-    pb$tick()
-    Sys.sleep(1 / numIterations)
-    loss <- numeric()
-      for (j in 1:lrep) {        
-        alpha2 <- rigamma(n = 1, a = a2, b = b2)
+    
+    loops <- pbmcmapply(function(k){ 
+      lapply(X=1:lrep,function(i,n){  
+        alpha2 <- LearnBayes::rigamma(n = 1, a = a2, b = b2)
         alpha <- sqrt(alpha2)
-        beta <- rigamma(n = 1, a = a1, b = b1)
+        beta <- LearnBayes::rigamma(n = 1, a = a1, b = b1)
         x <- rbs(n = n, alpha = alpha, beta = beta)
-        lapla <- laplace(logpost = logp.beta, mode = median(x), x = x, a1 = a1, b1 = b1,
-                         a2 = a2, b2 = b2)
-        beta.pos <- rbeta.post(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2,
-                               burnin = nburn, thin = thin, start = median(x), 
-                               varcov = lapla$var, scale = scale)
-        if (diag.if == TRUE) {
-          if (n == ns[nrep + 1] && j == 1) {
-            graph_name <- paste(path.diag, "diag_", diag.name, 
-                                ".pdf", sep = "")
-            pdf(graph_name)
-            par(mfrow = c(2, 1))
-            plot.ts(beta.pos$sam, xlab = "iteration", ylab = "")
-            acf(beta.pos$sam, main = "")
-            dev.off()
-            par(mfrow = c(1, 1))
-            diag.if <- FALSE
-          }
+        lapla <- laplace(logpost = logp.beta, mode = median(x), x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2)
+        beta.pos <- rbeta.post(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2,burnin = nburn, thin = thin, start = median(x), varcov = lapla$var, scale = scale)
+        
+        if (n == nprint & i == 1) {
+          graph_name <- paste(path.diag, "/diag_", diag.name, ".pdf", sep = "")
+          pdf(graph_name)
+          par(mfrow = c(2, 1))
+          plot.ts(beta.pos$sam, xlab = "iteration", ylab = "")
+          acf(beta.pos$sam, main = "")
+          dev.off()
+          par(mfrow = c(1, 1))
         }
-        lam.pos <- numeric()
-        for (k in 1:length(beta.pos$sam)) {
-          lam.pos[k] <- rigamma(n = 1, a = (n + 1)/2 + a2, 
-                                b = b2 + sum(0.5*(x/beta.pos$sam[k] + beta.pos$sam[k]/x - 2)))
-        }
+        
+        t_k <- lapply(seq_len(length(beta.pos$sam)), function(i) sum(0.5*(x/beta.pos$sam[i] + beta.pos$sam[i]/x - 2))) %>% unlist() #ok!
+        lam.pos <- mapply(LearnBayes::rigamma,n = 1, a = (n + 1)/2 + a2, b = b2 + t_k) 
         theta.pos <- beta.pos$sam*(1 + lam.pos/2) 
         
         medi.pos <- median(theta.pos)
-        loss <- append(loss, mean(abs(theta.pos - medi.pos)) + cost*n)
-        accept <- append(accept, beta.pos$accept)
-      }
-      risk <- append(risk, mean(loss))
-    }
-  } else if (loss == 'L2') { # quadratic loss ATUALIZANDO
-    numIterations <- length(ns)
-    pb <- progress::progress_bar$new(format = "  run [:bar] :percent eta: :eta", total = numIterations, clear = FALSE, width= 60)
-    for (n in ns) {
-      pb$tick()
-      Sys.sleep(1 / numIterations)
-      loss <- numeric()
-      for (j in 1:lrep) {
-        alpha2 <- rigamma(n = 1, a = a2, b = b2)
+        loss <-  mean(abs(theta.pos - medi.pos)) + cost*n
+        accept <- beta.pos$accept
+        
+        
+        c(loss,accept)
+      },n=k) %>% unlist() %>% matrix(ncol=2,nrow=lrep,byrow = TRUE) %>% apply(MARGIN = 2,mean)
+    }, k=ns,mc.cores = detectCores()-2) %>% unlist() %>% matrix(ncol=2,nrow=length(ns),byrow = TRUE)  
+    
+  }else if (loss == 'L2') { # quadratic loss ATUALIZANDO
+    loops <- pbmcmapply(function(k){ 
+      lapply(X=1:lrep,function(i,n){
+        alpha2 <- LearnBayes::rigamma(n = 1, a = a2, b = b2)
         alpha <- sqrt(alpha2)
-        beta <- rigamma(n = 1, a = a1, b = b1)
+        beta <- LearnBayes::rigamma(n = 1, a = a1, b = b1)
         x <- rbs(n = n, alpha = alpha, beta = beta)
         lapla <- laplace(logpost = logp.beta, mode = median(x), x = x, a1 = a1, b1 = b1,
                          a2 = a2, b2 = b2)
         beta.pos <- rbeta.post(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2,
                                burnin = nburn, thin = thin, start = median(x), 
                                varcov = lapla$var, scale = scale)
-        if (diag.if == TRUE) {
-          if (n == ns[nrep + 1] && j == 1) {
-            graph_name <- paste(path.diag, "diag_", diag.name, 
-                                ".pdf", sep = "")
-            pdf(graph_name)
-            par(mfrow = c(2, 1))
-            plot.ts(beta.pos$sam, xlab = "iteration", ylab = "")
-            acf(beta.pos$sam, main = "")
-            dev.off()
-            par(mfrow = c(1, 1))
-            diag.if <- FALSE
-          }
+        if (n == nprint & i == 1) {
+          graph_name <- paste(path.diag, "/diag_", diag.name, ".pdf", sep = "")
+          pdf(graph_name)
+          par(mfrow = c(2, 1))
+          plot.ts(beta.pos$sam, xlab = "iteration", ylab = "")
+          acf(beta.pos$sam, main = "")
+          dev.off()
+          par(mfrow = c(1, 1))
         }
-        lam.pos <- numeric()
-        for (k in 1:length(beta.pos$sam)) {
-          lam.pos[k] <- rigamma(n = 1, a = (n + 1)/2 + a2, 
-                                b = b2 + sum(0.5*(x/beta.pos$sam[k] + beta.pos$sam[k]/x - 2)))
-        }
+        
+        t_k <- lapply(seq_len(length(beta.pos$sam)), function(i) sum(0.5*(x/beta.pos$sam[i] + beta.pos$sam[i]/x - 2))) %>% unlist() #ok!
+        lam.pos <- mapply(LearnBayes::rigamma,n = 1, a = (n + 1)/2 + a2, b = b2 + t_k) #ok!
         theta.pos <- beta.pos$sam*(1 + lam.pos/2) 
-        loss <- append(loss, var(theta.pos) + cost*n)
-        accept <- append(accept, beta.pos$accept)
-      }
-      risk <- append(risk, mean(loss))
-    }
+        loss <- var(theta.pos) + cost*n
+        accept <-  beta.pos$accept
+        c(loss,accept)
+      },n=k) %>% unlist() %>% matrix(ncol=2,nrow=lrep,byrow = TRUE) %>% apply(MARGIN = 2,mean)
+    }, k=ns,mc.cores = detectCores()-2) %>% unlist() %>% matrix(ncol=2,nrow=length(ns),byrow = TRUE)  
   } else if (loss == 'L3') { # loss function for interval inference depending on rho
-    numIterations <- length(ns)
-    pb <- progress::progress_bar$new(format = "  run [:bar] :percent eta: :eta", total = numIterations, clear = FALSE, width= 60)
-    for (n in ns) {
-      pb$tick()
-      Sys.sleep(1 / numIterations)
-      loss <- numeric()
-      for (j in 1:lrep) {
-        alpha2 <- rigamma(n = 1, a = a2, b = b2)
+    loops <- pbmcmapply(function(k){ 
+      lapply(X=1:lrep,function(i,n){
+        alpha2 <- LearnBayes::rigamma(n = 1, a = a2, b = b2)
         alpha <- sqrt(alpha2)
-        beta <- rigamma(n = 1, a = a1, b = b1)
+        beta <- LearnBayes::rigamma(n = 1, a = a1, b = b1)
         x <- rbs(n = n, alpha = alpha, beta = beta)
         lapla <- laplace(logpost = logp.beta, mode = median(x), x = x, a1 = a1, b1 = b1,
                          a2 = a2, b2 = b2)
         beta.pos <- rbeta.post(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2,
                                burnin = nburn, thin = thin, start = median(x), 
                                varcov = lapla$var, scale = scale)
-        if (diag.if == TRUE) {
-          if (n == ns[nrep + 1] && j == 1) {
-            graph_name <- paste(path.diag, "diag_", diag.name, 
-                                ".pdf", sep = "")
-            pdf(graph_name)
-            par(mfrow = c(2, 1))
-            plot.ts(beta.pos$sam, xlab = "iteration", ylab = "")
-            acf(beta.pos$sam, main = "")
-            dev.off()
-            par(mfrow = c(1, 1))
-            diag.if <- FALSE
-          }
+        if (n == nprint & i == 1) {
+          graph_name <- paste(path.diag, "/diag_", diag.name, ".pdf", sep = "")
+          pdf(graph_name)
+          par(mfrow = c(2, 1))
+          plot.ts(beta.pos$sam, xlab = "iteration", ylab = "")
+          acf(beta.pos$sam, main = "")
+          dev.off()
+          par(mfrow = c(1, 1))
         }
-        lam.pos <- numeric()
-        for (k in 1:length(beta.pos$sam)) {
-          lam.pos[k] <- rigamma(n = 1, a = (n + 1)/2 + a2, 
-                                b = b2 + sum(0.5*(x/beta.pos$sam[k] + beta.pos$sam[k]/x - 2)))
-        }
-        theta.pos <- beta.pos$sam*(1 + lam.pos/2)
+        
+        t_k <- lapply(seq_len(length(beta.pos$sam)), function(i) sum(0.5*(x/beta.pos$sam[i] + beta.pos$sam[i]/x - 2))) %>% unlist() #ok!
+        lam.pos <- mapply(LearnBayes::rigamma,n = 1, a = (n + 1)/2 + a2, b = b2 + t_k) #ok!
+        theta.pos <- beta.pos$sam*(1 + lam.pos/2) 
         qs <- quantile(theta.pos, probs = c(rho/2, 1 - rho/2))
-        loss <- append(loss, sum(theta.pos[which(theta.pos > qs[2])])/npost - sum(theta.pos[which(theta.pos < qs[1])])/npost + cost*n)
-        accept <- append(accept, beta.pos$accept)
-      }
-      risk <- append(risk, mean(loss))
-    }
-  } else if (loss == 'L4') { # loss function for interval inference depending on gamma
-    numIterations <- length(ns)
-    pb <- progress::progress_bar$new(format = "  run [:bar] :percent eta: :eta", total = numIterations, clear = FALSE, width= 60)
-    for (n in ns) {
-      pb$tick()
-      Sys.sleep(1 / numIterations)
-      loss <- numeric()
-      for (j in 1:lrep) {
-        alpha2 <- rigamma(n = 1, a = a2, b = b2)
+        loss <-  sum(theta.pos[which(theta.pos > qs[2])])/npost - sum(theta.pos[which(theta.pos < qs[1])])/npost + cost*n
+        accept <-  beta.pos$accept
+        c(loss,accept)
+      },n=k) %>% unlist() %>% matrix(ncol=2,nrow=lrep,byrow = TRUE) %>% apply(MARGIN = 2,mean)
+    }, k=ns,mc.cores = detectCores()-2) %>% unlist() %>% matrix(ncol=2,nrow=length(ns),byrow = TRUE)  
+  } 
+  else if(loss == 'L4'){ # loss function for interval inference depending on gamma
+    loops <- pbmcmapply(function(k){ 
+      lapply(X=1:lrep,function(i,n){
+        alpha2 <- LearnBayes::rigamma(n = 1, a = a2, b = b2)
         alpha <- sqrt(alpha2)
-        beta <- rigamma(n = 1, a = a1, b = b1)
+        beta <- LearnBayes::rigamma(n = 1, a = a1, b = b1)
         x <- rbs(n = n, alpha = alpha, beta = beta)
         lapla <- laplace(logpost = logp.beta, mode = median(x), x = x, a1 = a1, b1 = b1,
                          a2 = a2, b2 = b2)
         beta.pos <- rbeta.post(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2,
                                burnin = nburn, thin = thin, start = median(x), 
                                varcov = lapla$var, scale = scale)
-        if (diag.if == TRUE) {
-          if (n == ns[nrep + 1] && j == 1) {
-            graph_name <- paste(path.diag, "diag_", diag.name, 
-                                ".pdf", sep = "")
-            pdf(graph_name)
-            par(mfrow = c(2, 1))
-            plot.ts(beta.pos$sam, xlab = "iteration", ylab = "")
-            acf(beta.pos$sam, main = "")
-            dev.off()
-            par(mfrow = c(1, 1))
-            diag.if <- FALSE
-          }
+        if (n == nprint & i == 1) {
+          graph_name <- paste(path.diag, "/diag_", diag.name, ".pdf", sep = "")
+          pdf(graph_name)
+          par(mfrow = c(2, 1))
+          plot.ts(beta.pos$sam, xlab = "iteration", ylab = "")
+          acf(beta.pos$sam, main = "")
+          dev.off()
+          par(mfrow = c(1, 1))
         }
-        lam.pos <- numeric()
-        for (k in 1:length(beta.pos$sam)) {
-          lam.pos[k] <- rigamma(n = 1, a = (n + 1)/2 + a2, 
-                                b = b2 + sum(0.5*(x/beta.pos$sam[k] + beta.pos$sam[k]/x - 2)))
-        }
+        
+        t_k <- lapply(seq_len(length(beta.pos$sam)), function(i) sum(0.5*(x/beta.pos$sam[i] + beta.pos$sam[i]/x - 2))) %>% unlist() #ok!
+        lam.pos <- mapply(LearnBayes::rigamma,n = 1, a = (n + 1)/2 + a2, b = b2 + t_k) #ok!
         theta.pos <- beta.pos$sam*(1 + lam.pos/2)
-        loss <- append(loss, 2*sqrt(gam*var(theta.pos)) + cost*n)
-        accept <- append(accept, beta.pos$accept)
-      }
-      risk <- append(risk, mean(loss))
-    }
+        
+        loss <-  2*sqrt(gam*var(theta.pos)) + cost*n
+        accept <- beta.pos$accept
+        c(loss,accept)
+      },n=k) %>% unlist() %>% matrix(ncol=2,nrow=lrep,byrow = TRUE) %>% apply(MARGIN = 2,mean)
+    }, k=ns,mc.cores = detectCores()-2) %>% unlist() %>% matrix(ncol=2,nrow=length(ns),byrow = TRUE)
   }
+  
+  risk <- loops[,1]
   Z <- log(risk - cost*ns)
   fit <- lm(Z ~ I(log(ns + 1)))
   E <- as.numeric(exp(fit$coef[1]))
@@ -364,39 +329,32 @@ bss.dt.bs <- function(loss = 'L1', a1 = 2.5, b1 = 1E2, a2 = 2.5, b2 = 1E2,
   
   if (plots == TRUE) {
     
-    plot(ns, risk, xlim = c(0, max(ns) + 1), 
-         ylim = c(min(risk) - 0.5, max(risk) + 0.5), 
-         xlab = "n", ylab = "TC(n)")
-    curve <- function(x) {cost*x + E/(1 + x)^G}
-    plot(function(x)curve(x), 0, max(ns) + 1, col = "blue", add = TRUE)
-    graphics::abline(v = nmin, col = "red")
-    
-    # vx <- seq(max(nmin-0.4*nmin,0),nmin+0.6*nmin,by=0.01)
-    # vx_max <- max(vx)
-    # vx_min <- min(vx)
-    # curve <- function(x) {cost*x + E/((1 + x)^G)}
-    # vc <- mapply(curve, x=vx)
-    # data0 <- data.frame(ns=ns,risk=risk)
-    # data1 <- data.frame(obs=vx,ab=vc)
-    # 
-    # p <- ggplot(data0, aes(ns,risk)) + geom_point() + 
-    # geom_line(color='blue',data=data1,aes(obs,ab)) +
-    # geom_point(aes(x=nmin,y=curve(nmin) ),colour='red',size=4) #+ 
-    #  geom_segment(aes(x = nmin, y = min(vc)+0.2*sd(vc) , xend = nmin, yend =max(vc)-3*sd(vc)  ),arrow = arrow(length = unit(0.01, "npc"))) + 
-    #  geom_text()+
-    #  annotate("text",x=nmin,y=max(vc)-2.9*sd(vc),label='Optimal sample size', size =4) + 
-    #  xlim(vx_min,vx_max) + xlab("n") + ylab("TC(n)")
-    
-    #if(loss == 'L1'|| loss == 'L2'){
-    #  file.name <- paste('case',loss,a,b,cost,'.pdf', sep='_')
-    #} else if(loss == 'L3'){
-    #  file.name <- paste('case',loss,a,b,cost,rho, '.pdf', sep='_')
-    #} else{
-    #  file.name <- paste('case',loss,a,b,cost,gam,'.pdf', sep='_')
-    #}
-    
-    #if(save.plot == FALSE) print(p) else ggsave(file.name,p,dpi=300, width = 15, height = 10, units = "cm",device=cairo_pdf)
-    
+    if(save.plot == FALSE){ 
+      par(mar=c(4.1,4.1,0.2,0.2))
+      plot(ns, risk, xlim = c(0, max(ns) + 1), ylim = c(min(risk) - 0.5, max(risk) + 0.5), xlab = "n", ylab = "TC(n)",pch=19)
+      curve <- function(x) {cost*x + E/(1 + x)^G}
+      plot(function(x)curve(x), 0, max(ns) + 1, col = "blue", add = TRUE)
+      points(nmin,curve(nmin),pch=19,col=2)
+      legend("top",pch=19,legend = paste("Optimal Sample Size = ",nmin,sep = ''), col=2, bty ='n')
+    }else{
+      
+      if(loss == 'L1'|| loss == 'L2'){
+        file.name <- paste('case','_',loss,'_',a,'_',b,'_',cost,'.pdf', sep='')
+      } else if(loss == 'L3'){
+        file.name <- paste('case','_',loss,'_',a,'_',b,'_',cost,'.pdf', sep='')
+      } else{
+        file.name <- paste('case','_',loss,'_',a,'_',b,'_',cost,'.pdf', sep='')
+      }
+      pdf(file.name)
+      par(mar=c(4.1,4.1,0.2,0.2))
+      plot(ns, risk, xlim = c(0, max(ns) + 1), ylim = c(min(risk) - 0.5, max(risk) + 0.5), xlab = "n", ylab = "TC(n)",pch=19)
+      curve <- function(x) {cost*x + E/(1 + x)^G}
+      plot(function(x)curve(x), 0, max(ns) + 1, col = "blue", add = TRUE)
+      points(nmin,curve(nmin),pch=19,col=2)
+      legend("top",pch=19,legend = paste("Optimal Sample Size = ",nmin,sep = ''), col=2, bty ='n')
+      dev.off()
+      
+    }
   }
   
   if(prints == TRUE)
@@ -407,12 +365,11 @@ bss.dt.bs <- function(loss = 'L1', a1 = 2.5, b1 = 1E2, a2 = 2.5, b2 = 1E2,
     cat("\nSample size:\n")
     cat("n  = ", nmin, "\n")
     cat("---------------\n")
-    cat("accept = ", mean(accept), "\n")
+    cat("accept = ", mean(loops[,2]), "\n")
   }else{ 
     out <- list(n = nmin, risk=risk, cost=cost, loss = loss, E=E, G=G)
     
     return(out)
   }
 }
-
 

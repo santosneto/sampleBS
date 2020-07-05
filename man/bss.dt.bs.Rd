@@ -6,26 +6,26 @@
 \usage{
 bss.dt.bs(
   loss = "L1",
-  a1 = 2.5,
-  b1 = 100,
-  a2 = 2.5,
-  b2 = 100,
+  a1 = 8,
+  b1 = 50,
+  a2 = 8,
+  b2 = 50,
   cost = 0.01,
   rho = 0.05,
   gam = 1,
-  nmax = 100,
-  nlag = 5,
-  nrep = 10,
+  nmax = 2000,
+  nlag = 200,
+  nrep = 6L,
   lrep = 100,
   npost = 500,
   nburn = 500,
-  thin = 20,
-  scale = 1,
+  thin = 20L,
+  scale = 1L,
   plots = TRUE,
   prints = TRUE,
   save.plot = FALSE,
-  diag.if = TRUE,
   path.diag = getwd(),
+  diag.name = "plot",
   ...
 )
 }
@@ -59,11 +59,11 @@ Default is 100.}
 
 \item{npost}{a positive integer representing the number of values to draw from the posterior distribution of the mean. Default is 100.}
 
-\item{nburn}{x}
+\item{nburn}{a positive constant for the sampling method.}
 
-\item{thin}{x}
+\item{thin}{a positive constant for the sampling method.}
 
-\item{scale}{x}
+\item{scale}{a positive constant for the sampling method.}
 
 \item{plots}{Boolean. If TRUE (default) it plot the estimated Bayes risks and the fitted curve.}
 
@@ -71,9 +71,9 @@ Default is 100.}
 
 \item{save.plot}{Boolean. If TRUE, the plot is saved to an external file. The default is FALSE.}
 
-\item{diag.if}{x}
-
 \item{path.diag}{x}
+
+\item{diag.name}{x}
 
 \item{...}{Currently ignored.}
 }
