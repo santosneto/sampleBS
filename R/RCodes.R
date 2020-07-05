@@ -189,7 +189,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
   cl <- match.call()
   ns <- rep(seq(2, nmax, by = nlag), each = nrep)
   nprint <- ns[nrep+1]
-  a <- b <- NULL
+  
   
   if (loss == 'L1') { # absolute loss
     
@@ -340,11 +340,11 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
     }else{
       
       if(loss == 'L1'|| loss == 'L2'){
-        file.name <- paste('case','_',loss,'_',a,'_',b,'_',cost,'.pdf', sep='')
+        file.name <- paste('case','_',loss,'_',a1,'_',b1,'_',cost,'.pdf', sep='')
       } else if(loss == 'L3'){
-        file.name <- paste('case','_',loss,'_',a,'_',b,'_',cost,'.pdf', sep='')
+        file.name <- paste('case','_',loss,'_',a1,'_',b1,'_',cost,'.pdf', sep='')
       } else{
-        file.name <- paste('case','_',loss,'_',a,'_',b,'_',cost,'.pdf', sep='')
+        file.name <- paste('case','_',loss,'_',a1,'_',b1,'_',cost,'.pdf', sep='')
       }
       pdf(file.name)
       par(mar=c(4.1,4.1,0.2,0.2))
