@@ -265,7 +265,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
                                burnin = nburn, thin = thin, start = median(x), 
                                varcov = lapla$var, scale = scale)
         if (n == nprint & i == 1) {
-          graph_name <- paste("diag_","L1_",a1,'_',b1,'_',cost,'_',rho,".pdf", sep = "")
+          graph_name <- paste("diag_","L3_",a1,'_',b1,'_',cost,'_',rho,".pdf", sep = "")
           pdf(graph_name)
           par(mfrow = c(2, 1))
           plot.ts(beta.pos$sam, xlab = "iteration", ylab = "")
@@ -297,7 +297,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
                                burnin = nburn, thin = thin, start = median(x), 
                                varcov = lapla$var, scale = scale)
         if (n == nprint & i == 1) {
-          graph_name <- paste("diag_","L1_",a1,'_',b1,'_',cost,'_',gam,".pdf", sep = "")
+          graph_name <- paste("diag_","L4_",a1,'_',b1,'_',cost,'_',gam,".pdf", sep = "")
           pdf(graph_name)
           par(mfrow = c(2, 1))
           plot.ts(beta.pos$sam, xlab = "iteration", ylab = "")
