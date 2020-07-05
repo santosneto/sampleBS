@@ -24,8 +24,6 @@ bss.dt.bs(
   plots = TRUE,
   prints = TRUE,
   save.plot = FALSE,
-  path.diag = getwd(),
-  diag.name = "plot",
   ...
 )
 }
@@ -70,10 +68,6 @@ Default is 100.}
 \item{prints}{Boolean. If FALSE (default) the output is a list.}
 
 \item{save.plot}{Boolean. If TRUE, the plot is saved to an external file. The default is FALSE.}
-
-\item{path.diag}{x}
-
-\item{diag.name}{x}
 
 \item{...}{Currently ignored.}
 }

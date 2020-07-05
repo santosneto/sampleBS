@@ -151,8 +151,6 @@ rbeta.post <- function(N, x, a1, b1, a2, b2, burnin, thin, start,
 #' @param nburn a positive constant for the sampling method.
 #' @param thin a positive constant for the sampling method.
 #' @param scale a positive constant for the sampling method. 
-#' @param diag.name x
-#' @param path.diag x
 #' @param save.plot Boolean. If TRUE, the plot is saved to an external file. The default is FALSE.    
 #' @param ... Currently ignored.
 #' 
@@ -183,8 +181,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
                       cost = 0.01, rho = 0.05, gam = 1, nmax = 2E3, 
                       nlag = 2E2, nrep = 6L, lrep = 1E2, npost = 5E2, 
                       nburn = 5E2, thin = 20L, scale = 1L,
-                      plots = TRUE, prints = TRUE, save.plot = FALSE,
-                      path.diag = getwd(), diag.name='plot', ...) 
+                      plots = TRUE, prints = TRUE, save.plot = FALSE, ...) 
 {
   cl <- match.call()
   ns <- rep(seq(2, nmax, by = nlag), each = nrep)
@@ -203,7 +200,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
         beta.pos <- rbeta.post(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2,burnin = nburn, thin = thin, start = median(x), varcov = lapla$var, scale = scale)
         
         if (n == nprint & i == 1) {
-          graph_name <- paste(path.diag, "/diag_", diag.name, ".pdf", sep = "")
+          graph_name <- paste("diag_","L1_",a1,'_',b1,'_',cost, ".pdf", sep = "")
           pdf(graph_name)
           par(mfrow = c(2, 1))
           plot.ts(beta.pos$sam, xlab = "iteration", ylab = "")
@@ -238,7 +235,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
                                burnin = nburn, thin = thin, start = median(x), 
                                varcov = lapla$var, scale = scale)
         if (n == nprint & i == 1) {
-          graph_name <- paste(path.diag, "/diag_", diag.name, ".pdf", sep = "")
+          graph_name <- paste("diag_","L2_",a1,'_',b1,'_',cost, ".pdf", sep = "")
           pdf(graph_name)
           par(mfrow = c(2, 1))
           plot.ts(beta.pos$sam, xlab = "iteration", ylab = "")
@@ -268,7 +265,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
                                burnin = nburn, thin = thin, start = median(x), 
                                varcov = lapla$var, scale = scale)
         if (n == nprint & i == 1) {
-          graph_name <- paste(path.diag, "/diag_", diag.name, ".pdf", sep = "")
+          graph_name <- paste("diag_","L1_",a1,'_',b1,'_',cost,'_',rho,".pdf", sep = "")
           pdf(graph_name)
           par(mfrow = c(2, 1))
           plot.ts(beta.pos$sam, xlab = "iteration", ylab = "")
@@ -300,7 +297,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
                                burnin = nburn, thin = thin, start = median(x), 
                                varcov = lapla$var, scale = scale)
         if (n == nprint & i == 1) {
-          graph_name <- paste(path.diag, "/diag_", diag.name, ".pdf", sep = "")
+          graph_name <- paste("diag_","L1_",a1,'_',b1,'_',cost,'_',gam,".pdf", sep = "")
           pdf(graph_name)
           par(mfrow = c(2, 1))
           plot.ts(beta.pos$sam, xlab = "iteration", ylab = "")
@@ -342,9 +339,9 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
       if(loss == 'L1'|| loss == 'L2'){
         file.name <- paste('case','_',loss,'_',a1,'_',b1,'_',cost,'.pdf', sep='')
       } else if(loss == 'L3'){
-        file.name <- paste('case','_',loss,'_',a1,'_',b1,'_',cost,'.pdf', sep='')
+        file.name <- paste('case','_',loss,'_',a1,'_',b1,'_',cost,'_',rho,'.pdf', sep='')
       } else{
-        file.name <- paste('case','_',loss,'_',a1,'_',b1,'_',cost,'.pdf', sep='')
+        file.name <- paste('case','_',loss,'_',a1,'_',b1,'_',cost,'_',gam,'.pdf', sep='')
       }
       pdf(file.name)
       par(mar=c(4.1,4.1,0.2,0.2))
