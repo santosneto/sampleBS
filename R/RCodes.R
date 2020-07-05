@@ -320,6 +320,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
     }, k=ns,mc.cores = detectCores()-2) %>% unlist() %>% matrix(ncol=2,nrow=length(ns),byrow = TRUE)
   }
   
+  accept <- mean(loops[,2])
   risk <- loops[,1]
   Z <- log(risk - cost*ns)
   fit <- lm(Z ~ I(log(ns + 1)))
@@ -365,9 +366,9 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
     cat("\nSample size:\n")
     cat("n  = ", nmin, "\n")
     cat("---------------\n")
-    cat("accept = ", mean(loops[,2]), "\n")
+    cat("accept = ", accept , "\n")
   }else{ 
-    out <- list(n = nmin, risk=risk, cost=cost, loss = loss, E=E, G=G)
+    out <- list(n = nmin, risk=risk, cost=cost, loss = loss, E=E, G=G,accept=accept )
     
     return(out)
   }
