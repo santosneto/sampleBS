@@ -155,7 +155,6 @@ rbeta.post <- function(N, x, a1, b1, a2, b2, burnin, thin, start,
 #' @param scale a positive constant for the sampling method. 
 #' @param save.plot Boolean. If TRUE, the plot is saved to an external file. The default is FALSE. 
 #' @param diagnostic xxx. 
-#' @param nProcess xxx.  
 #' @param ... Currently ignored.
 #' 
 #'

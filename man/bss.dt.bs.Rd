@@ -77,8 +77,6 @@ Default is 100.}
 \item{diagnostic}{xxx.}
 
 \item{...}{Currently ignored.}
-
-\item{nProcess}{xxx.}
 }
 \value{
 An integer representing the optimal sample size.
