@@ -26,6 +26,7 @@ bss.dt.bs(
   prints = TRUE,
   save.plot = FALSE,
   diagnostic = FALSE,
+  mc.preschedule = FALSE,
   ...
 )
 }
@@ -75,6 +76,8 @@ Default is 100.}
 \item{save.plot}{Boolean. If TRUE, the plot is saved to an external file. The default is FALSE.}
 
 \item{diagnostic}{xxx.}
+
+\item{mc.preschedule}{xxx}
 
 \item{...}{Currently ignored.}
 }

@@ -155,6 +155,7 @@ rbeta.post <- function(N, x, a1, b1, a2, b2, burnin, thin, start,
 #' @param scale a positive constant for the sampling method. 
 #' @param save.plot Boolean. If TRUE, the plot is saved to an external file. The default is FALSE. 
 #' @param diagnostic xxx. 
+#' @param mc.preschedule xxx
 #' @param ... Currently ignored.
 #' 
 #'
@@ -182,7 +183,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
                       cost = 0.01, rho = 0.05, gam = 1,nmin=2, nmax = 2E3, 
                       nlag = 2E2, nrep = 6L, lrep = 1E2, npost = 5E2, 
                       nburn = 5E2, thin = 20L, scale = 1L,
-                      plots = TRUE, prints = TRUE, save.plot = FALSE, diagnostic = FALSE,...) 
+                      plots = TRUE, prints = TRUE, save.plot = FALSE, diagnostic = FALSE, mc.preschedule = FALSE,...) 
 {
   cl <- match.call()
   ns <- rep(seq(nmin, nmax, by = nlag), each = nrep)
@@ -227,7 +228,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
         
         c(loss,accept)
       },n=k) %>% unlist() %>% matrix(ncol=2,nrow=lrep,byrow = TRUE) %>% apply(MARGIN = 2,mean)
-    }, k=ns,mc.cores = cores ) %>% unlist() %>% matrix(ncol=2,nrow=length(ns),byrow = TRUE)  
+    }, k=ns,mc.cores = cores, mc.preschedule = mc.preschedule) %>% unlist() %>% matrix(ncol=2,nrow=length(ns),byrow = TRUE)  
     
   }else if (loss == 'L2') { # quadratic loss ATUALIZANDO
     loops <- pbmcmapply(function(k){ 
@@ -258,7 +259,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
         accept <-  beta.pos$accept
         c(loss,accept)
       },n=k) %>% unlist() %>% matrix(ncol=2,nrow=lrep,byrow = TRUE) %>% apply(MARGIN = 2,mean)
-    }, k=ns,mc.cores = cores ) %>% unlist() %>% matrix(ncol=2,nrow=length(ns),byrow = TRUE)  
+    }, k=ns,mc.cores = cores, mc.preschedule = mc.preschedule) %>% unlist() %>% matrix(ncol=2,nrow=length(ns),byrow = TRUE)  
   } else if (loss == 'L3') { # loss function for interval inference depending on rho
     loops <- pbmcmapply(function(k){ 
       lapply(X=1:lrep,function(i,n){
@@ -289,7 +290,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
         accept <-  beta.pos$accept
         c(loss,accept)
       },n=k) %>% unlist() %>% matrix(ncol=2,nrow=lrep,byrow = TRUE) %>% apply(MARGIN = 2,mean)
-    }, k=ns,mc.cores = cores) %>% unlist() %>% matrix(ncol=2,nrow=length(ns),byrow = TRUE)  
+    }, k=ns,mc.cores = cores, mc.preschedule = mc.preschedule) %>% unlist() %>% matrix(ncol=2,nrow=length(ns),byrow = TRUE)  
   } 
   else if(loss == 'L4'){ # loss function for interval inference depending on gamma
     loops <- pbmcmapply(function(k){ 
@@ -321,7 +322,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
         accept <- beta.pos$accept
         c(loss,accept)
       },n=k) %>% unlist() %>% matrix(ncol=2,nrow=lrep,byrow = TRUE) %>% apply(MARGIN = 2,mean)
-    }, k=ns,mc.cores = cores) %>% unlist() %>% matrix(ncol=2,nrow=length(ns),byrow = TRUE)
+    }, k=ns,mc.cores = cores, mc.preschedule = mc.preschedule) %>% unlist() %>% matrix(ncol=2,nrow=length(ns),byrow = TRUE)
   }
   
 
