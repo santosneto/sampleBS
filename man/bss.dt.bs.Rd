@@ -13,6 +13,7 @@ bss.dt.bs(
   cost = 0.01,
   rho = 0.05,
   gam = 1,
+  nmin = 2,
   nmax = 2000,
   nlag = 200,
   nrep = 6L,
@@ -24,6 +25,7 @@ bss.dt.bs(
   plots = TRUE,
   prints = TRUE,
   save.plot = FALSE,
+  diagnostic = FALSE,
   ...
 )
 }
@@ -45,6 +47,9 @@ for loss function L3. The default is 0.95.}
 
 \item{gam}{a positive real number connected with the credible interval when using loss
 function L4. The default is 0.5.}
+
+\item{nmin}{a positive integer representing the minimum number for compute the Bayes risk.
+Default is 2.}
 
 \item{nmax}{a positive integer representing the maximum number for compute the Bayes risk.
 Default is 100.}
@@ -68,6 +73,8 @@ Default is 100.}
 \item{prints}{Boolean. If FALSE (default) the output is a list.}
 
 \item{save.plot}{Boolean. If TRUE, the plot is saved to an external file. The default is FALSE.}
+
+\item{diagnostic}{xxx.}
 
 \item{...}{Currently ignored.}
 }

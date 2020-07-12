@@ -142,6 +142,8 @@ rbeta.post <- function(N, x, a1, b1, a2, b2, burnin, thin, start,
 #' function L4. The default is 0.5.
 #' @param nmax a positive integer representing the maximum number for compute the Bayes risk.
 #' Default is 100.
+#' @param nmin a positive integer representing the minimum number for compute the Bayes risk.
+#' Default is 2.
 #' @param nlag a positive integer representing the lag in the n's used to compute the Bayes risk. Default is 10.
 #' @param nrep a positive integer representing the number of samples taken for each \eqn{n}.
 #' @param lrep a positive integer representing the number of samples taken for \eqn{S_n}. Default is 100.
@@ -151,7 +153,8 @@ rbeta.post <- function(N, x, a1, b1, a2, b2, burnin, thin, start,
 #' @param nburn a positive constant for the sampling method.
 #' @param thin a positive constant for the sampling method.
 #' @param scale a positive constant for the sampling method. 
-#' @param save.plot Boolean. If TRUE, the plot is saved to an external file. The default is FALSE.    
+#' @param save.plot Boolean. If TRUE, the plot is saved to an external file. The default is FALSE. 
+#' @param diagnostic xxx.   
 #' @param ... Currently ignored.
 #' 
 #'
@@ -178,13 +181,13 @@ rbeta.post <- function(N, x, a1, b1, a2, b2, burnin, thin, start,
 #' @importFrom graphics legend points
 
 bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50, 
-                      cost = 0.01, rho = 0.05, gam = 1, nmax = 2E3, 
+                      cost = 0.01, rho = 0.05, gam = 1,nmin=2, nmax = 2E3, 
                       nlag = 2E2, nrep = 6L, lrep = 1E2, npost = 5E2, 
                       nburn = 5E2, thin = 20L, scale = 1L,
-                      plots = TRUE, prints = TRUE, save.plot = FALSE, ...) 
+                      plots = TRUE, prints = TRUE, save.plot = FALSE, diagnostic = FALSE, ...) 
 {
   cl <- match.call()
-  ns <- rep(seq(2, nmax, by = nlag), each = nrep)
+  ns <- rep(seq(nmin, nmax, by = nlag), each = nrep)
   nprint <- ns[nrep+1]
   
   
@@ -199,7 +202,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
         lapla <- laplace(logpost = logp.beta, mode = median(x), x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2)
         beta.pos <- rbeta.post(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2,burnin = nburn, thin = thin, start = median(x), varcov = lapla$var, scale = scale)
         
-        if (n == nprint & i == 1) {
+        if(diagnostic == TRUE & n == nprint & i == 1){
           graph_name <- paste("diag_","L1_",a1,'_',b1,'_',cost, ".pdf", sep = "")
           pdf(graph_name)
           par(mfrow = c(2, 1))
@@ -234,7 +237,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
         beta.pos <- rbeta.post(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2,
                                burnin = nburn, thin = thin, start = median(x), 
                                varcov = lapla$var, scale = scale)
-        if (n == nprint & i == 1) {
+        if(diagnostic == TRUE & n == nprint & i == 1){
           graph_name <- paste("diag_","L2_",a1,'_',b1,'_',cost, ".pdf", sep = "")
           pdf(graph_name)
           par(mfrow = c(2, 1))
@@ -264,7 +267,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
         beta.pos <- rbeta.post(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2,
                                burnin = nburn, thin = thin, start = median(x), 
                                varcov = lapla$var, scale = scale)
-        if (n == nprint & i == 1) {
+        if(diagnostic == TRUE & n == nprint & i == 1){
           graph_name <- paste("diag_","L3_",a1,'_',b1,'_',cost,'_',rho,".pdf", sep = "")
           pdf(graph_name)
           par(mfrow = c(2, 1))
@@ -296,7 +299,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
         beta.pos <- rbeta.post(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2,
                                burnin = nburn, thin = thin, start = median(x), 
                                varcov = lapla$var, scale = scale)
-        if (n == nprint & i == 1) {
+        if(diagnostic == TRUE & n == nprint & i == 1){
           graph_name <- paste("diag_","L4_",a1,'_',b1,'_',cost,'_',gam,".pdf", sep = "")
           pdf(graph_name)
           par(mfrow = c(2, 1))
@@ -329,9 +332,9 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
     
     if(save.plot == FALSE){ 
       par(mar=c(4.1,4.1,0.2,0.2))
-      plot(ns, risk, xlim = c(0, max(ns) + 1), ylim = c(min(risk) - 0.5, max(risk) + 0.5), xlab = "n", ylab = "TC(n)",pch=19)
+      plot(ns, risk, xlim = c(min(ns), max(ns) + 1), ylim = c(min(risk) - 0.5, max(risk) + 0.5), xlab = "n", ylab = "TC(n)",pch=19)
       curve <- function(x) {cost*x + E/(1 + x)^G}
-      plot(function(x)curve(x), 0, max(ns) + 1, col = "blue", add = TRUE)
+      plot(function(x)curve(x), min(ns), max(ns) + 1, col = "blue", add = TRUE)
       points(nmin,curve(nmin),pch=19,col=2)
       legend("top",pch=19,legend = paste("Optimal Sample Size = ",nmin,sep = ''), col=2, bty ='n')
     }else{
@@ -345,7 +348,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
       }
       pdf(file.name)
       par(mar=c(4.1,4.1,0.2,0.2))
-      plot(ns, risk, xlim = c(0, max(ns) + 1), ylim = c(min(risk) - 0.5, max(risk) + 0.5), xlab = "n", ylab = "TC(n)",pch=19)
+      plot(ns, risk, xlim = c(min(ns), max(ns) + 1), ylim = c(min(risk) - 0.5, max(risk) + 0.5), xlab = "n", ylab = "TC(n)",pch=19)
       curve <- function(x) {cost*x + E/(1 + x)^G}
       plot(function(x)curve(x), 0, max(ns) + 1, col = "blue", add = TRUE)
       points(nmin,curve(nmin),pch=19,col=2)
