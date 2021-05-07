@@ -156,6 +156,7 @@ rbeta.post <- function(N, x, a1, b1, a2, b2, burnin, thin, start,
 #' @param save.plot Boolean. If TRUE, the plot is saved to an external file. The default is FALSE. 
 #' @param diagnostic xxx. 
 #' @param mc.preschedule xxx
+#' @param l xxx
 #' @param ... Currently ignored.
 #' 
 #'
@@ -180,22 +181,23 @@ rbeta.post <- function(N, x, a1, b1, a2, b2, burnin, thin, start,
 #' @importFrom graphics legend points par plot
 
 bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50, 
-                      cost = 0.01, rho = 0.05, gam = 1,nmin=2, nmax = 2E3, 
-                      nlag = 2E2, nrep = 6L, lrep = 1E2, npost = 5E2, 
-                      nburn = 5E2, thin = 20L, scale = 1L,
-                      plots = TRUE, prints = TRUE, save.plot = FALSE, diagnostic = FALSE, mc.preschedule = FALSE,...) 
+                      cost = 0.01, rho = 0.05, gam = 1, l = 1,
+                      nmin=2, nmax = 2E3, nlag = 2E2, nrep = 6L, lrep = 1E2, 
+                      npost = 5E2, nburn = 5E2, thin = 20L, scale = 1L,
+                      plots = TRUE, prints = TRUE, save.plot = FALSE, 
+                      diagnostic = FALSE, mc.preschedule = FALSE, ...) 
 {
   cl <- match.call()
   ns <- rep(seq(nmin, nmax, by = nlag), each = nrep)
-  nprint <- ns[nrep+1]
+  nprint <- ns[nrep + 1]
   
   if (.Platform$OS.type == "windows") {
     cores <- 1
   } else {
-    cores <- detectCores()-2
+    cores <- detectCores() - 2
   }
   
-
+  
   if (loss == 'L1') { # absolute loss
     
     loops <- pbmcmapply(function(k){ 
@@ -207,7 +209,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
         lapla <- laplace(logpost = logp.beta, mode = median(x), x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2)
         beta.pos <- rbeta.post(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2,burnin = nburn, thin = thin, start = median(x), varcov = lapla$var, scale = scale)
         
-        if(diagnostic == TRUE & n == nprint & i == 1){
+        if (diagnostic == TRUE & n == nprint & i == 1) {
           graph_name <- paste("diag_","L1_",a1,'_',b1,'_',cost, ".pdf", sep = "")
           pdf(graph_name)
           par(mfrow = c(2, 1))
@@ -230,7 +232,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
       },n=k) %>% unlist() %>% matrix(ncol=2,nrow=lrep,byrow = TRUE) %>% apply(MARGIN = 2,mean)
     }, k=ns,mc.cores = cores, mc.preschedule = mc.preschedule) %>% unlist() %>% matrix(ncol=2,nrow=length(ns),byrow = TRUE)  
     
-  }else if (loss == 'L2') { # quadratic loss ATUALIZANDO
+  } else if (loss == 'L2') { # quadratic loss
     loops <- pbmcmapply(function(k){ 
       lapply(X=1:lrep,function(i,n){
         alpha2 <- LearnBayes::rigamma(n = 1, a = a2, b = b2)
@@ -260,7 +262,8 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
         c(loss,accept)
       },n=k) %>% unlist() %>% matrix(ncol=2,nrow=lrep,byrow = TRUE) %>% apply(MARGIN = 2,mean)
     }, k=ns,mc.cores = cores, mc.preschedule = mc.preschedule) %>% unlist() %>% matrix(ncol=2,nrow=length(ns),byrow = TRUE)  
-  } else if (loss == 'L3') { # loss function for interval inference depending on rho
+    
+  } else if (loss == 'L3') { # Linex loss
     loops <- pbmcmapply(function(k){ 
       lapply(X=1:lrep,function(i,n){
         alpha2 <- LearnBayes::rigamma(n = 1, a = a2, b = b2)
@@ -272,8 +275,8 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
         beta.pos <- rbeta.post(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2,
                                burnin = nburn, thin = thin, start = median(x), 
                                varcov = lapla$var, scale = scale)
-        if(diagnostic == TRUE & n == nprint & i == 1){
-          graph_name <- paste("diag_","L3_",a1,'_',b1,'_',cost,'_',rho,".pdf", sep = "")
+        if (diagnostic == TRUE & n == nprint & i == 1) {
+          graph_name <- paste("diag_","L3_",a1,'_',b1,'_',cost, ".pdf", sep = "")
           pdf(graph_name)
           par(mfrow = c(2, 1))
           plot.ts(beta.pos$sam, xlab = "iteration", ylab = "")
@@ -285,14 +288,15 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
         t_k <- lapply(seq_len(length(beta.pos$sam)), function(i) sum(0.5*(x/beta.pos$sam[i] + beta.pos$sam[i]/x - 2))) %>% unlist() #ok!
         lam.pos <- mapply(LearnBayes::rigamma,n = 1, a = (n + 1)/2 + a2, b = b2 + t_k) #ok!
         theta.pos <- beta.pos$sam*(1 + lam.pos/2) 
-        qs <- quantile(theta.pos, probs = c(rho/2, 1 - rho/2))
-        loss <-  sum(theta.pos[which(theta.pos > qs[2])])/npost - sum(theta.pos[which(theta.pos < qs[1])])/npost + cost*n
+        
+        ds <- -(1/l)*mean(exp(-l*theta.pos))
+        loss <- l*(mean(theta.pos) - ds) + cost*n
         accept <-  beta.pos$accept
         c(loss,accept)
-      },n=k) %>% unlist() %>% matrix(ncol=2,nrow=lrep,byrow = TRUE) %>% apply(MARGIN = 2,mean)
-    }, k=ns,mc.cores = cores, mc.preschedule = mc.preschedule) %>% unlist() %>% matrix(ncol=2,nrow=length(ns),byrow = TRUE)  
-  } 
-  else if(loss == 'L4'){ # loss function for interval inference depending on gamma
+      },n = k) %>% unlist() %>% matrix(ncol = 2,nrow = lrep,byrow = TRUE) %>% apply(MARGIN = 2,mean)
+    }, k = ns,mc.cores = cores, mc.preschedule = mc.preschedule) %>% unlist() %>% matrix(ncol=2,nrow=length(ns),byrow = TRUE)  
+    
+  } else if (loss == 'L4') { # loss function for interval inference depending on rho
     loops <- pbmcmapply(function(k){ 
       lapply(X=1:lrep,function(i,n){
         alpha2 <- LearnBayes::rigamma(n = 1, a = a2, b = b2)
@@ -305,7 +309,40 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
                                burnin = nburn, thin = thin, start = median(x), 
                                varcov = lapla$var, scale = scale)
         if(diagnostic == TRUE & n == nprint & i == 1){
-          graph_name <- paste("diag_","L4_",a1,'_',b1,'_',cost,'_',gam,".pdf", sep = "")
+          graph_name <- paste("diag_","L4_",a1,'_',b1,'_',cost,'_',rho,".pdf", sep = "")
+          pdf(graph_name)
+          par(mfrow = c(2, 1))
+          plot.ts(beta.pos$sam, xlab = "iteration", ylab = "")
+          acf(beta.pos$sam, main = "")
+          dev.off()
+          par(mfrow = c(1, 1))
+        }
+        
+        t_k <- lapply(seq_len(length(beta.pos$sam)), function(i) sum(0.5*(x/beta.pos$sam[i] + beta.pos$sam[i]/x - 2))) %>% unlist() #ok!
+        lam.pos <- mapply(LearnBayes::rigamma,n = 1, a = (n + 1)/2 + a2, b = b2 + t_k) #ok!
+        theta.pos <- beta.pos$sam*(1 + lam.pos/2) 
+        
+        qs <- quantile(theta.pos, probs = c(rho/2, 1 - rho/2))
+        loss <-  sum(theta.pos[which(theta.pos > qs[2])])/npost - sum(theta.pos[which(theta.pos < qs[1])])/npost + cost*n
+        accept <-  beta.pos$accept
+        c(loss,accept)
+      },n=k) %>% unlist() %>% matrix(ncol=2,nrow=lrep,byrow = TRUE) %>% apply(MARGIN = 2,mean)
+    }, k=ns,mc.cores = cores, mc.preschedule = mc.preschedule) %>% unlist() %>% matrix(ncol=2,nrow=length(ns),byrow = TRUE)  
+  } 
+  else {# loss function for interval inference depending on gamma
+    loops <- pbmcmapply(function(k){ 
+      lapply(X=1:lrep,function(i,n){
+        alpha2 <- LearnBayes::rigamma(n = 1, a = a2, b = b2)
+        alpha <- sqrt(alpha2)
+        beta <- LearnBayes::rigamma(n = 1, a = a1, b = b1)
+        x <- rbs(n = n, alpha = alpha, beta = beta)
+        lapla <- laplace(logpost = logp.beta, mode = median(x), x = x, a1 = a1, b1 = b1,
+                         a2 = a2, b2 = b2)
+        beta.pos <- rbeta.post(N = npost, x = x, a1 = a1, b1 = b1, a2 = a2, b2 = b2,
+                               burnin = nburn, thin = thin, start = median(x), 
+                               varcov = lapla$var, scale = scale)
+        if(diagnostic == TRUE & n == nprint & i == 1){
+          graph_name <- paste("diag_","L5_",a1,'_',b1,'_',cost,'_',gam,".pdf", sep = "")
           pdf(graph_name)
           par(mfrow = c(2, 1))
           plot.ts(beta.pos$sam, xlab = "iteration", ylab = "")
@@ -325,7 +362,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
     }, k=ns,mc.cores = cores, mc.preschedule = mc.preschedule) %>% unlist() %>% matrix(ncol=2,nrow=length(ns),byrow = TRUE)
   }
   
-
+  
   accept <- mean(loops[,2])
   risk <- loops[,1]
   Z <- log(risk - cost*ns)
@@ -337,7 +374,7 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
   if (plots == TRUE) {
     
     if(save.plot == FALSE){ 
-      par(mar=c(4.1,4.1,0.2,0.2))
+      par(mar = c(4.1,4.1,0.2,0.2))
       plot(ns, risk, xlim = c(min(ns), max(ns) + 1), ylim = c(min(risk) - 0.5, max(risk) + 0.5), xlab = "n", ylab = "TC(n)",pch=19)
       curve <- function(x) {cost*x + E/(1 + x)^G}
       plot(function(x)curve(x), min(ns), max(ns) + 1, col = "blue", add = TRUE)
@@ -348,8 +385,10 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
       if(loss == 'L1'|| loss == 'L2'){
         file.name <- paste('case','_',loss,'_',a1,'_',b1,'_',cost,'.pdf', sep='')
       } else if(loss == 'L3'){
+        file.name <- paste('case','_',loss,'_',a1,'_',b1,'_',cost,'_',l,'.pdf', sep='')
+      } else if(loss == 'L4'){
         file.name <- paste('case','_',loss,'_',a1,'_',b1,'_',cost,'_',rho,'.pdf', sep='')
-      } else{
+      } else if(loss == 'L5') {
         file.name <- paste('case','_',loss,'_',a1,'_',b1,'_',cost,'_',gam,'.pdf', sep='')
       }
       pdf(file.name)
@@ -379,4 +418,5 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
     return(out)
   }
 }
+
 

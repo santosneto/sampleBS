@@ -13,6 +13,7 @@ bss.dt.bs(
   cost = 0.01,
   rho = 0.05,
   gam = 1,
+  l = 1,
   nmin = 2,
   nmax = 2000,
   nlag = 200,
@@ -48,6 +49,8 @@ for loss function L3. The default is 0.95.}
 
 \item{gam}{a positive real number connected with the credible interval when using loss
 function L4. The default is 0.5.}
+
+\item{l}{xxx}
 
 \item{nmin}{a positive integer representing the minimum number for compute the Bayes risk.
 Default is 2.}
