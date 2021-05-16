@@ -1,9 +1,9 @@
 Package: samplesizeBS
 Type: Package
 Title: Bayesian sample size in a decision-theoretic approach for the Birbaum-Saunders
-Version: 0.2.0
+Version: 1.1-1
 Date: 2020-07-05
-Author: Eliador Costa[aut, cre] and Manoel Santos Neto [aut, cre]
+Author: Eliador Costa[aut, cre], Manoel Santos Neto [aut, cre] and Victor Leiva [aut]
 Maintainer: Manoel Santos Neto <manoelferreira@uaest.ufcg.edu.br> and Eliardo Costa <eliardocosta@ccet.ufrn.br>
 Description: Optimal Bayesian sample size for estimating the mean of the Birbaum-Saunders distribution. Also, this package includes the random generation of the joint posterior distribution of the BS/inverse-gamma model.
 Depends: R (>= 3.1.2), LearnBayes, dplyr, magrittr, pbmcapply
