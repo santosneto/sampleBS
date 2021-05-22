@@ -420,3 +420,17 @@ bss.dt.bs <- function(loss = 'L1', a1 = 8, b1 = 50, a2 = 8, b2 = 50,
 }
 
 
+#'Repair times
+#'
+#'These observations correspond to maintenance data on active repair times (in hours) for an airborne communications transceiver.
+#'
+#'@format A data frame with 46 observations:
+#' \describe{
+#'   \item{repair}{repair times}
+#' }
+#' 
+#' @references 
+#' Hsieh, H.K. Estimating the critical time of the inverse Gaussian hazard rate.  \emph{IEEE Trans. Reliab.} 1990, \emph{39}, 342--345.
+"repair"
+
+
